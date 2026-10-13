@@ -1,0 +1,1432 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Presensi GPS & Selfie</title>
+
+    <!-- Google Fonts & Tailwind CSS CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Leaflet CSS & JS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- FontAwesome 6 CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      #map,
+      #adminMap {
+        height: clamp(220px, 32vw, 340px);
+        width: 100%;
+        border-radius: 1rem;
+        z-index: 1;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+      }
+
+      @media (max-width: 640px) {
+        #map,
+        #adminMap {
+          height: 240px;
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between antialiased selection:bg-indigo-500 selection:text-white"
+  >
+    <!-- ================= LAYAR LOGIN ================= -->
+    <div
+      id="loginScreen"
+      class="min-h-screen flex items-center justify-center px-4 py-8 bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-950"
+    >
+      <div
+        class="glass-card p-8 rounded-3xl shadow-2xl w-full max-w-sm space-y-6 border border-white/10"
+      >
+        <div class="text-center space-y-2">
+          <div
+            class="inline-flex p-4 bg-indigo-600/10 text-indigo-500 rounded-2xl mb-1 ring-1 ring-indigo-500/20"
+          >
+            <i class="fa-solid fa-location-dot text-3xl"></i>
+          </div>
+          <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">
+            Smart Presensi
+          </h2>
+          <p class="text-xs text-slate-500 font-medium">
+            Masuk menggunakan NIP dan PIN Anda
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label
+              class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1"
+              >NIP (Nomor Induk Pegawai)</label
+            >
+            <div class="relative">
+              <i
+                class="fa-solid fa-id-card absolute left-3.5 top-3.5 text-slate-400 text-xs"
+              ></i>
+              <input
+                type="text"
+                id="loginNip"
+                placeholder="Contoh: 1001 atau 9999"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1"
+              >PIN Keamanan</label
+            >
+            <div class="relative">
+              <i
+                class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400 text-xs"
+              ></i>
+              <input
+                type="password"
+                id="loginPin"
+                placeholder="Default: 1234"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              />
+            </div>
+          </div>
+
+          <button
+            id="btnLogin"
+            onclick="handleLogin()"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2"
+          >
+            <span id="loginBtnText"
+              ><i class="fa-solid fa-right-to-bracket mr-1"></i> Masuk
+              Sistem</span
+            >
+          </button>
+        </div>
+
+        <div
+          class="p-3 bg-slate-50 border border-slate-200/60 rounded-xl text-[11px] text-slate-600 space-y-1"
+        >
+          <p class="font-bold text-indigo-600">
+            <i class="fa-solid fa-circle-info mr-1"></i> Akun Demo Default:
+          </p>
+          <p>
+            • <b>Pegawai:</b> NIP:
+            <code class="bg-slate-200 px-1 rounded text-slate-800">1001</code> |
+            PIN:
+            <code class="bg-slate-200 px-1 rounded text-slate-800">1234</code>
+          </p>
+          <p>
+            • <b>Admin:</b> NIP:
+            <code class="bg-slate-200 px-1 rounded text-slate-800">9999</code> |
+            PIN:
+            <code class="bg-slate-200 px-1 rounded text-slate-800">1234</code>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= CONTAINER UTAMA APLIKASI ================= -->
+    <div
+      id="appScreen"
+      class="hidden min-h-screen bg-slate-100 flex flex-col justify-between"
+    >
+      <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-50">
+        <div
+          class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex justify-between items-center"
+        >
+          <div class="flex items-center space-x-3 min-w-0">
+            <div
+              class="w-10 h-10 shrink-0 bg-white/10 rounded-full flex items-center justify-center text-white ring-1 ring-white/20"
+            >
+              <i class="fa-solid fa-user-check text-lg"></i>
+            </div>
+            <div class="min-w-0">
+              <h1
+                class="font-bold text-sm leading-tight truncate"
+                id="userDisplayName"
+              >
+                Nama User
+              </h1>
+              <p
+                class="text-[10px] text-indigo-200 font-medium"
+                id="userDisplayNip"
+              >
+                NIP: -
+              </p>
+            </div>
+          </div>
+
+          <div class="flex shrink-0 items-center space-x-2">
+            <span
+              id="roleBadge"
+              class="bg-indigo-900/80 border border-indigo-400/30 text-[10px] text-indigo-200 px-2.5 py-1 rounded-full font-extrabold uppercase tracking-wide"
+              >Role</span
+            >
+            <button
+              onclick="handleLogout()"
+              class="bg-indigo-800/80 hover:bg-rose-600 p-2 rounded-xl text-xs transition-colors"
+              title="Logout"
+            >
+              <i
+                class="fa-solid fa-power-off text-rose-300 hover:text-white"
+              ></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main
+        class="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 flex-grow"
+      >
+        <!-- ================= 1. DASHBOARD PEGAWAI ================= -->
+        <div id="pegawaiDashboard" class="hidden space-y-4">
+          <div
+            class="bg-white rounded-2xl p-1.5 flex shadow-sm border border-slate-200 text-xs font-bold"
+          >
+            <button
+              onclick="switchPegawaiTab('presensi')"
+              id="btnPegawaiPresensi"
+              class="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-center shadow transition-all"
+            >
+              <i class="fa-solid fa-camera mr-1"></i> Form Absen
+            </button>
+            <button
+              onclick="switchPegawaiTab('riwayat')"
+              id="btnPegawaiRiwayat"
+              class="flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all"
+            >
+              <i class="fa-solid fa-clock-rotate-left mr-1"></i> Riwayat Saya
+            </button>
+          </div>
+
+          <!-- FORM ABSENSI VIEW -->
+          <div
+            id="pegawaiFormView"
+            class="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0"
+          >
+            <div
+              class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-2"
+            >
+              <div class="flex justify-between items-center">
+                <span
+                  class="text-[11px] font-bold text-slate-500 uppercase tracking-wider"
+                  ><i class="fa-solid fa-map-pin mr-1 text-rose-500"></i>
+                  Geofencing GPS</span
+                >
+                <span
+                  id="distanceInfo"
+                  class="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-100 font-bold text-slate-600"
+                  >Mencari GPS...</span
+                >
+              </div>
+              <div id="map"></div>
+            </div>
+
+            <!-- Camera Card dengan Auto-Start & Native Camera Upload -->
+            <div
+              class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 text-center space-y-3"
+            >
+              <div class="flex justify-between items-center">
+                <span
+                  class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block text-left"
+                >
+                  <i class="fa-solid fa-camera-retro mr-1 text-indigo-500"></i>
+                  Verification Selfie
+                </span>
+                <button
+                  type="button"
+                  onclick="toggleCameraFacing()"
+                  class="text-[11px] text-indigo-600 font-bold hover:underline flex items-center space-x-1"
+                >
+                  <i class="fa-solid fa-rotate text-xs"></i>
+                  <span>Ganti Kamera</span>
+                </button>
+              </div>
+
+              <div
+                class="relative w-full h-56 sm:h-64 lg:h-72 bg-slate-950 rounded-xl overflow-hidden flex items-center justify-center border border-slate-800 shadow-inner"
+              >
+                <video
+                  id="videoPreview"
+                  autoplay
+                  playsinline
+                  muted
+                  class="w-full h-full object-cover hidden"
+                ></video>
+                <canvas id="canvasPreview" class="hidden"></canvas>
+                <img
+                  id="imagePreview"
+                  class="hidden w-full h-full object-cover"
+                />
+
+                <div
+                  id="cameraPlaceholder"
+                  class="absolute text-slate-500 text-center space-y-2 p-4"
+                >
+                  <div
+                    class="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center mx-auto text-slate-400"
+                  >
+                    <i class="fa-solid fa-circle-notch fa-spin text-xl"></i>
+                  </div>
+                  <p class="text-[11px] font-semibold text-slate-400">
+                    Menghubungkan Kamera...
+                  </p>
+                </div>
+                <button
+                  id="cameraStartButton"
+                  type="button"
+                  onclick="startCameraAuto()"
+                  class="hidden absolute bottom-3 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-bold"
+                >
+                  <i class="fa-solid fa-camera mr-1"></i> Aktifkan Kamera
+                </button>
+              </div>
+
+              <!-- Tombol Aksi Kamera Stream & Native Input -->
+              <div id="cameraActionButtons" class="flex space-x-2">
+                <button
+                  type="button"
+                  onclick="takeSelfie()"
+                  class="flex-1 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white py-3 rounded-xl text-xs font-bold shadow-md transition-all flex items-center justify-center space-x-1.5"
+                >
+                  <i class="fa-solid fa-camera text-sm"></i>
+                  <span>Ambil Foto</span>
+                </button>
+
+                <!-- Membuka Kamera Bawaan HP Langsung -->
+                <label
+                  class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center justify-center space-x-1.5"
+                >
+                  <i class="fa-solid fa-file-image"></i>
+                  <span>Kamera Perangkat</span>
+                  <input
+                    type="file"
+                    id="nativeCameraInput"
+                    accept="image/*"
+                    capture="user"
+                    class="hidden"
+                    onchange="handleNativeCameraUpload(event)"
+                  />
+                </label>
+              </div>
+
+              <!-- Tombol Foto Ulang ketika foto terambil -->
+              <div id="cameraRetakeButton" class="hidden">
+                <button
+                  type="button"
+                  onclick="retakePhoto()"
+                  class="w-full bg-slate-200 hover:bg-slate-300 active:scale-95 text-slate-700 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5"
+                >
+                  <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                  <span>Foto Ulang</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex space-x-2 pt-1 lg:col-span-2">
+              <button
+                onclick="submitPresence('MASUK')"
+                class="flex-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white py-3.5 rounded-2xl font-extrabold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center space-x-1"
+              >
+                <i class="fa-solid fa-right-to-bracket text-sm"></i>
+                <span>Absen Masuk</span>
+              </button>
+              <button
+                onclick="submitPresence('PULANG')"
+                class="flex-1 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white py-3.5 rounded-2xl font-extrabold text-xs shadow-md shadow-rose-600/20 transition-all flex items-center justify-center space-x-1"
+              >
+                <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                <span>Absen Pulang</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="pegawaiRiwayatView" class="hidden space-y-3">
+            <div
+              class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3"
+            >
+              <h3
+                class="text-xs font-bold text-slate-700 uppercase tracking-wider"
+              >
+                <i class="fa-solid fa-history text-indigo-600 mr-1"></i> Log
+                Presensi Pribadi
+              </h3>
+              <div id="userLogList" class="space-y-2 text-xs">
+                <p class="text-slate-400 text-center py-6">
+                  Memuat data riwayat...
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= 2. DASHBOARD ADMIN ================= -->
+        <div id="adminDashboard" class="hidden space-y-4">
+          <div
+            class="bg-white rounded-2xl p-1.5 flex shadow-sm border border-slate-200 text-[11px] font-bold"
+          >
+            <button
+              onclick="switchAdminTab('stats')"
+              id="btnAdminStats"
+              class="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-center shadow transition-all"
+            >
+              Statistik
+            </button>
+            <button
+              onclick="switchAdminTab('geofence')"
+              id="btnAdminGeofence"
+              class="flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all"
+            >
+              Geofence
+            </button>
+            <button
+              onclick="switchAdminTab('users')"
+              id="btnAdminUsers"
+              class="flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all"
+            >
+              Pegawai
+            </button>
+            <button
+              onclick="switchAdminTab('logs')"
+              id="btnAdminLogs"
+              class="flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all"
+            >
+              Laporan
+            </button>
+          </div>
+
+          <div id="adminStatsView" class="space-y-3">
+            <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+              <div
+                class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm"
+              >
+                <span
+                  class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block"
+                  >Total Pegawai</span
+                >
+                <span
+                  id="statTotalPegawai"
+                  class="text-3xl font-black text-indigo-600 mt-1 block"
+                  >0</span
+                >
+              </div>
+              <div
+                class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm"
+              >
+                <span
+                  class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block"
+                  >Presensi Hari Ini</span
+                >
+                <span
+                  id="statTotalHariIni"
+                  class="text-3xl font-black text-slate-800 mt-1 block"
+                  >0</span
+                >
+              </div>
+              <div
+                class="bg-emerald-50/80 p-4 rounded-2xl border border-emerald-200"
+              >
+                <span
+                  class="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider block"
+                  >Dalam Radius</span
+                >
+                <span
+                  id="statBerhasil"
+                  class="text-3xl font-black text-emerald-700 mt-1 block"
+                  >0</span
+                >
+              </div>
+              <div class="bg-rose-50/80 p-4 rounded-2xl border border-rose-200">
+                <span
+                  class="text-[10px] font-extrabold text-rose-600 uppercase tracking-wider block"
+                  >Ditolak (Luar)</span
+                >
+                <span
+                  id="statDitolak"
+                  class="text-3xl font-black text-rose-700 mt-1 block"
+                  >0</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div id="adminGeofenceView" class="hidden space-y-3">
+            <div
+              class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3"
+            >
+              <div class="flex justify-between items-center">
+                <div>
+                  <h3
+                    class="font-bold text-slate-800 text-xs uppercase tracking-wider"
+                  >
+                    <i
+                      class="fa-solid fa-map-location-dot text-indigo-600 mr-1"
+                    ></i>
+                    Area Geofencing Kantor
+                  </h3>
+                  <p class="text-[10px] text-slate-400">
+                    Geser pin biru untuk menentukan koordinat kantor
+                  </p>
+                </div>
+              </div>
+
+              <div id="adminMap"></div>
+
+              <div
+                class="p-3 bg-slate-50 rounded-xl text-xs text-slate-600 flex justify-between border border-slate-200/80 font-mono"
+              >
+                <div>
+                  <b>Lat:</b>
+                  <span id="adminLatVal" class="text-indigo-600 font-bold"
+                    >-</span
+                  >
+                </div>
+                <div>
+                  <b>Lng:</b>
+                  <span id="adminLngVal" class="text-indigo-600 font-bold"
+                    >-</span
+                  >
+                </div>
+              </div>
+
+              <div class="space-y-3 pt-1">
+                <div>
+                  <label
+                    class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1"
+                    >Radius Toleransi Presensi (Meter)</label
+                  >
+                  <input
+                    type="number"
+                    id="adminRadius"
+                    class="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label
+                      class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1"
+                      >Masuk mulai</label
+                    >
+                    <input
+                      type="time"
+                      id="adminCheckInStart"
+                      class="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1"
+                      >Masuk sampai</label
+                    >
+                    <input
+                      type="time"
+                      id="adminCheckInEnd"
+                      class="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1"
+                      >Pulang mulai</label
+                    >
+                    <input
+                      type="time"
+                      id="adminCheckOutStart"
+                      class="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1"
+                      >Pulang sampai</label
+                    >
+                    <input
+                      type="time"
+                      id="adminCheckOutEnd"
+                      class="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-semibold"
+                    />
+                  </div>
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  Transport Rp150.000/hari diberikan jika durasi kerja minimal 8
+                  jam.
+                </p>
+                <p class="text-[10px] text-slate-500">
+                  Token Fonnte dikelola di Script Properties sebagai
+                  FONNTE_TOKEN.
+                </p>
+                <button
+                  onclick="saveAdminSettings()"
+                  class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all"
+                >
+                  <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Pengaturan
+                  Kantor
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="adminUsersView" class="hidden space-y-3">
+            <div
+              class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3"
+            >
+              <h3
+                class="font-bold text-slate-800 text-xs uppercase tracking-wider"
+              >
+                <i class="fa-solid fa-user-plus text-indigo-600 mr-1"></i>
+                Tambah Pegawai Baru
+              </h3>
+              <div class="space-y-2">
+                <input
+                  type="text"
+                  id="newNip"
+                  placeholder="NIP (Nomor Induk Pegawai)"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-semibold"
+                />
+                <input
+                  type="text"
+                  id="newNama"
+                  placeholder="Nama Lengkap"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-semibold"
+                />
+                <select
+                  id="newRole"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-semibold"
+                >
+                  <option value="Pegawai">Pegawai</option>
+                  <option value="Admin">Admin</option>
+                </select>
+                <input
+                  type="text"
+                  id="newWa"
+                  placeholder="No WhatsApp (Contoh: 628123...)"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-semibold"
+                />
+                <input
+                  type="password"
+                  id="newPin"
+                  placeholder="PIN Akses (Default: 1234)"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-semibold"
+                />
+                <button
+                  onclick="handleAddUser()"
+                  class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all"
+                >
+                  <i class="fa-solid fa-plus mr-1"></i> Simpan Pegawai Baru
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="adminLogsView" class="hidden space-y-3">
+            <div
+              class="bg-white p-3.5 rounded-2xl border border-slate-200 space-y-2"
+            >
+              <h3
+                class="font-bold text-slate-700 text-xs uppercase tracking-wider"
+              >
+                <i class="fa-solid fa-filter mr-1"></i> Filter Laporan Global
+              </h3>
+              <div class="grid grid-cols-2 gap-2">
+                <input
+                  type="date"
+                  id="filterDate"
+                  onchange="loadAdminLogs()"
+                  class="border border-slate-200 bg-slate-50 rounded-xl p-2 text-xs font-semibold"
+                />
+                <input
+                  type="month"
+                  id="filterMonth"
+                  onchange="loadAdminLogs()"
+                  class="border border-slate-200 bg-slate-50 rounded-xl p-2 text-xs font-semibold"
+                />
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+            >
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr
+                      class="bg-slate-50 text-[10px] text-slate-500 uppercase tracking-wider border-b border-slate-100"
+                    >
+                      <th class="p-3">Pegawai</th>
+                      <th class="p-3">Waktu</th>
+                      <th class="p-3">Status</th>
+                      <th class="p-3 text-center">Foto</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    id="adminLogTable"
+                    class="text-xs divide-y divide-slate-100"
+                  >
+                    <tr>
+                      <td colspan="4" class="p-4 text-center text-slate-400">
+                        Memuat laporan...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="text-center py-3 text-[10px] text-slate-400 font-medium">
+        Smart Attendance Mobile System &copy; 2026
+      </footer>
+    </div>
+
+    <script>
+      let currentUser = null;
+      let systemSettings = null;
+      let userLat = null,
+        userLng = null;
+      let map = null,
+        userMarker = null,
+        officeCircle = null;
+      let adminMap = null,
+        adminMarker = null,
+        adminCircle = null;
+
+      let currentStream = null;
+      let currentFacingMode = "user";
+      let capturedBase64 = null;
+
+      // LOGIN & AUTHENTICATION
+      function handleLogin() {
+        const nip = document.getElementById("loginNip").value.trim();
+        const pin = document.getElementById("loginPin").value.trim();
+        const btnText = document.getElementById("loginBtnText");
+        const btn = document.getElementById("btnLogin");
+
+        if (!nip || !pin) return alert("Masukkan NIP dan PIN Anda!");
+
+        btnText.innerHTML =
+          '<i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Memeriksa...';
+        btn.disabled = true;
+
+        google.script.run
+          .withSuccessHandler((res) => {
+            btnText.innerHTML =
+              '<i class="fa-solid fa-right-to-bracket mr-1"></i> Masuk Sistem';
+            btn.disabled = false;
+
+            if (res.success) {
+              currentUser = res.user;
+              document.getElementById("loginScreen").classList.add("hidden");
+              document.getElementById("appScreen").classList.remove("hidden");
+
+              document.getElementById("userDisplayName").innerText =
+                currentUser.nama;
+              document.getElementById("userDisplayNip").innerText =
+                "NIP: " + currentUser.nip;
+              document.getElementById("roleBadge").innerText = currentUser.role;
+
+              fetchInitialData();
+
+              if (currentUser.role === "Admin") {
+                document
+                  .getElementById("adminDashboard")
+                  .classList.remove("hidden");
+                document
+                  .getElementById("pegawaiDashboard")
+                  .classList.add("hidden");
+                loadAdminStats();
+              } else {
+                document
+                  .getElementById("pegawaiDashboard")
+                  .classList.remove("hidden");
+                document
+                  .getElementById("adminDashboard")
+                  .classList.add("hidden");
+                switchPegawaiTab("presensi");
+              }
+            } else {
+              alert(res.message);
+            }
+          })
+          .withFailureHandler((err) => {
+            btnText.innerHTML =
+              '<i class="fa-solid fa-right-to-bracket mr-1"></i> Masuk Sistem';
+            btn.disabled = false;
+            alert("Gagal terhubung ke Apps Script: " + err.message);
+          })
+          .loginUser(nip, pin);
+      }
+
+      function handleLogout() {
+        stopCameraStream();
+        currentUser = null;
+        document.getElementById("appScreen").classList.add("hidden");
+        document.getElementById("loginScreen").classList.remove("hidden");
+        document.getElementById("loginNip").value = "";
+        document.getElementById("loginPin").value = "";
+      }
+
+      function fetchInitialData() {
+        google.script.run
+          .withSuccessHandler((data) => {
+            systemSettings = data.settings;
+
+            document.getElementById("adminRadius").value =
+              systemSettings.radius;
+            document.getElementById("adminCheckInStart").value =
+              systemSettings.checkInStart;
+            document.getElementById("adminCheckInEnd").value =
+              systemSettings.checkInEnd;
+            document.getElementById("adminCheckOutStart").value =
+              systemSettings.checkOutStart;
+            document.getElementById("adminCheckOutEnd").value =
+              systemSettings.checkOutEnd;
+            document.getElementById("adminLatVal").innerText =
+              systemSettings.lat.toFixed(6);
+            document.getElementById("adminLngVal").innerText =
+              systemSettings.lng.toFixed(6);
+
+            document.getElementById("adminRadius").oninput = function () {
+              const r = parseFloat(this.value) || 0;
+              if (adminCircle) adminCircle.setRadius(r);
+            };
+
+            if (currentUser.role === "Admin") {
+              initAdminMap();
+            } else {
+              initPegawaiMap();
+              startGpsTracking();
+            }
+          })
+          .getInitialData();
+      }
+
+      // PETA PEGAWAI & TRACKING GPS
+      function initPegawaiMap() {
+        if (!systemSettings) return;
+        const officeLatLng = [systemSettings.lat, systemSettings.lng];
+
+        if (!map) {
+          map = L.map("map").setView(officeLatLng, 16);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+          }).addTo(map);
+        } else {
+          map.setView(officeLatLng, 16);
+        }
+
+        if (officeCircle) map.removeLayer(officeCircle);
+        officeCircle = L.circle(officeLatLng, {
+          color: "#e11d48",
+          fillColor: "#f43f5e",
+          fillOpacity: 0.2,
+          radius: systemSettings.radius,
+        }).addTo(map);
+
+        setTimeout(() => map.invalidateSize(), 300);
+      }
+
+      function startGpsTracking() {
+        if (navigator.geolocation) {
+          navigator.geolocation.watchPosition(
+            (pos) => {
+              userLat = pos.coords.latitude;
+              userLng = pos.coords.longitude;
+              const userLatLng = [userLat, userLng];
+
+              if (map) {
+                if (!userMarker) {
+                  userMarker = L.marker(userLatLng)
+                    .addTo(map)
+                    .bindPopup("Lokasi Anda")
+                    .openPopup();
+                } else {
+                  userMarker.setLatLng(userLatLng);
+                }
+              }
+
+              if (systemSettings) {
+                const dist = calculateDistance(
+                  userLat,
+                  userLng,
+                  systemSettings.lat,
+                  systemSettings.lng,
+                );
+                const badge = document.getElementById("distanceInfo");
+                if (dist <= systemSettings.radius) {
+                  badge.className =
+                    "text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold";
+                  badge.innerText = `Dalam Radius (${Math.round(dist)}m)`;
+                } else {
+                  badge.className =
+                    "text-[11px] px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 font-bold";
+                  badge.innerText = `Luar Radius (${Math.round(dist)}m)`;
+                }
+              }
+            },
+            (err) => console.log("GPS Error: " + err.message),
+            { enableHighAccuracy: true },
+          );
+        }
+      }
+
+      // PENANGANAN STREAM KAMERA (LAPTOP & MOBILE)
+      function isCameraAllowedInThisContext() {
+        const isLocalHost = ["localhost", "127.0.0.1", "::1"].includes(
+          window.location.hostname,
+        );
+        return window.isSecureContext || isLocalHost;
+      }
+
+      async function startCameraAuto() {
+        const video = document.getElementById("videoPreview");
+        const img = document.getElementById("imagePreview");
+        const placeholder = document.getElementById("cameraPlaceholder");
+        const startButton = document.getElementById("cameraStartButton");
+
+        if (!video || !placeholder || !startButton) return;
+
+        stopCameraStream();
+        img.classList.add("hidden");
+        video.classList.add("hidden");
+        video.srcObject = null;
+        capturedBase64 = null;
+        showRetakeUI(false);
+
+        placeholder.classList.remove("hidden");
+        startButton.classList.add("hidden");
+        placeholder.innerHTML = `
+        <div class="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center mx-auto text-slate-400">
+          <i class="fa-solid fa-circle-notch fa-spin text-xl"></i>
+        </div>
+        <p class="text-[11px] font-semibold text-slate-400">Menghubungkan Kamera...</p>`;
+
+        if (!isCameraAllowedInThisContext()) {
+          placeholder.innerHTML = `
+          <div class="text-rose-400 space-y-1 p-2">
+            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            <p class="text-[11px] font-semibold">Kamera hanya bisa dipakai pada halaman HTTPS/localhost</p>
+            <p class="text-[9px] text-slate-400">Jalankan aplikasi melalui HTTPS atau localhost, lalu izinkan akses kamera pada browser.</p>
+          </div>`;
+          startButton.classList.remove("hidden");
+          return;
+        }
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          placeholder.innerHTML =
+            '<p class="text-[11px] font-semibold text-rose-300">Browser Anda tidak mendukung akses kamera.</p>';
+          startButton.classList.remove("hidden");
+          return;
+        }
+
+        const constraintOptions = [
+          {
+            video: {
+              facingMode: { ideal: currentFacingMode },
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+            audio: false,
+          },
+          {
+            video: {
+              facingMode: currentFacingMode,
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+            audio: false,
+          },
+          {
+            video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+            audio: false,
+          },
+          { video: true, audio: false },
+        ];
+
+        let stream = null;
+        let lastError = null;
+
+        for (const constraint of constraintOptions) {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia(constraint);
+            if (stream) break;
+          } catch (err) {
+            lastError = err;
+            console.warn("Mencoba opsi kamera berikutnya...", err);
+          }
+        }
+
+        if (!stream) {
+          placeholder.innerHTML = `
+          <div class="text-rose-400 space-y-1 p-2">
+            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            <p class="text-[11px] font-semibold">Kamera belum dapat diakses</p>
+            <p class="text-[9px] text-slate-400">Izinkan kamera untuk situs ini, tutup aplikasi lain yang memakai kamera, lalu coba lagi.</p>
+            <p class="text-[8px] text-slate-500 mt-1">${lastError ? lastError.name + ": " + lastError.message : "Browser menolak akses kamera."}</p>
+          </div>`;
+          startButton.classList.remove("hidden");
+          return;
+        }
+
+        currentStream = stream;
+        video.srcObject = stream;
+        video.muted = true;
+        video.playsInline = true;
+        video.setAttribute("playsinline", "true");
+
+        // Cermin khusus kamera depan
+        video.style.transform =
+          currentFacingMode === "user" ? "scaleX(-1)" : "scaleX(1)";
+
+        try {
+          await video.play();
+          video.classList.remove("hidden");
+          placeholder.classList.add("hidden");
+          startButton.classList.add("hidden");
+        } catch (playErr) {
+          console.error("Gagal memutar video:", playErr);
+          placeholder.innerHTML = `
+          <div class="text-rose-400 space-y-1 p-2">
+            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            <p class="text-[11px] font-semibold">Kamera aktif, tetapi video tidak bisa diputar.</p>
+            <p class="text-[9px] text-slate-400">Coba tekan tombol "Aktifkan Kamera" lagi atau gunakan perangkat lain.</p>
+          </div>`;
+          startButton.classList.remove("hidden");
+        }
+      }
+
+      function takeSelfie() {
+        const video = document.getElementById("videoPreview");
+        const canvas = document.getElementById("canvasPreview");
+        const img = document.getElementById("imagePreview");
+
+        if (!currentStream || video.paused || video.ended) {
+          return alert("Kamera belum siap atau belum aktif!");
+        }
+
+        if (video.videoWidth === 0 || video.videoHeight === 0) {
+          return alert(
+            "Silakan tunggu sebentar hingga tampilan kamera muncul.",
+          );
+        }
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext("2d");
+
+        // Mirroring canvas untuk kamera selfie depan
+        if (currentFacingMode === "user") {
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
+        }
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Kompresi JPEG kualitas 0.8 untuk menghemat ukuran payload Apps Script
+        capturedBase64 = canvas.toDataURL("image/jpeg", 0.8);
+
+        img.src = capturedBase64;
+        img.classList.remove("hidden");
+        video.classList.add("hidden");
+
+        showRetakeUI(true);
+        stopCameraStream();
+      }
+
+      // KOMPRESI & OTOMATISASI KAMERA PERANGKAT (HP NATIVE CAMERA)
+      function handleNativeCameraUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          compressAndResizeImage(
+            event.target.result,
+            function (compressedData) {
+              const img = document.getElementById("imagePreview");
+              const video = document.getElementById("videoPreview");
+              const placeholder = document.getElementById("cameraPlaceholder");
+
+              capturedBase64 = compressedData;
+              img.src = capturedBase64;
+
+              img.classList.remove("hidden");
+              video.classList.add("hidden");
+              placeholder.classList.add("hidden");
+
+              showRetakeUI(true);
+              stopCameraStream();
+            },
+          );
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // Helper kompresi gambar HP agar tidak melebihi kapasitas Apps Script
+      function compressAndResizeImage(imageSrc, callback) {
+        const img = new Image();
+        img.onload = function () {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 1024;
+          const MAX_HEIGHT = 1024;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          callback(canvas.toDataURL("image/jpeg", 0.8));
+        };
+        img.src = imageSrc;
+      }
+
+      function retakePhoto() {
+        capturedBase64 = null;
+        const img = document.getElementById("imagePreview");
+        const video = document.getElementById("videoPreview");
+
+        img.classList.add("hidden");
+        img.src = "";
+        video.classList.add("hidden");
+
+        showRetakeUI(false);
+        startCameraAuto();
+      }
+
+      function showRetakeUI(isCaptured) {
+        const actionGroup = document.getElementById("cameraActionButtons");
+        const retakeGroup = document.getElementById("cameraRetakeButton");
+
+        if (isCaptured) {
+          actionGroup.classList.add("hidden");
+          retakeGroup.classList.remove("hidden");
+        } else {
+          actionGroup.classList.remove("hidden");
+          retakeGroup.classList.add("hidden");
+        }
+      }
+
+      function toggleCameraFacing() {
+        currentFacingMode =
+          currentFacingMode === "user" ? "environment" : "user";
+        startCameraAuto();
+      }
+
+      function stopCameraStream() {
+        if (currentStream) {
+          currentStream.getTracks().forEach((track) => track.stop());
+          currentStream = null;
+        }
+      }
+
+      // SUBMIT PRESENSI PEGAWAI
+      function submitPresence(type) {
+        if (!userLat || !userLng) return alert("Lokasi GPS belum terdeteksi!");
+        if (!capturedBase64) return alert("Silakan ambil foto selfie dulu!");
+
+        const payload = {
+          nip: currentUser.nip,
+          nama: currentUser.nama,
+          noWa: currentUser.noWa,
+          lat: userLat,
+          lng: userLng,
+          tipe: type,
+          imageBase64: capturedBase64,
+        };
+
+        alert("Mengirim data presensi...");
+
+        google.script.run
+          .withSuccessHandler((res) => {
+            alert(res.message);
+            if (res.success) location.reload();
+          })
+          .submitAttendance(payload);
+      }
+
+      // TAB MANAGEMENT PEGAWAI
+      function switchPegawaiTab(tab) {
+        if (tab === "presensi") {
+          document.getElementById("pegawaiFormView").classList.remove("hidden");
+          document.getElementById("pegawaiRiwayatView").classList.add("hidden");
+          document.getElementById("btnPegawaiPresensi").className =
+            "flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-center shadow transition-all";
+          document.getElementById("btnPegawaiRiwayat").className =
+            "flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all";
+          initPegawaiMap();
+          startCameraAuto();
+        } else {
+          stopCameraStream();
+          document.getElementById("pegawaiFormView").classList.add("hidden");
+          document
+            .getElementById("pegawaiRiwayatView")
+            .classList.remove("hidden");
+          document.getElementById("btnPegawaiPresensi").className =
+            "flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all";
+          document.getElementById("btnPegawaiRiwayat").className =
+            "flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-center shadow transition-all";
+          loadUserLogs();
+        }
+      }
+
+      function loadUserLogs() {
+        google.script.run
+          .withSuccessHandler((logs) => {
+            const list = document.getElementById("userLogList");
+            list.innerHTML = "";
+            if (logs.length === 0) {
+              list.innerHTML =
+                '<p class="text-slate-400 text-center py-6">Belum ada riwayat presensi.</p>';
+              return;
+            }
+            logs.forEach((l) => {
+              list.innerHTML += `
+            <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center border border-slate-100">
+              <div>
+                <span class="font-bold text-slate-800">${l.tipe}</span>
+                <span class="text-[10px] text-slate-400 block">${l.timestamp}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md ${l.status.includes("BERHASIL") ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}">${l.status}</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">${l.jarak}m dari kantor</span>
+                ${l.durasi !== "" ? `<span class="text-[10px] text-slate-500 block">${l.durasi} jam | Transport Rp${Number(l.transport).toLocaleString("id-ID")}</span>` : ""}
+              </div>
+            </div>
+          `;
+            });
+          })
+          .getAttendanceLogs("", "", currentUser.nip);
+      }
+
+      // DASHBOARD & PETA ADMIN
+      function switchAdminTab(tab) {
+        [
+          "adminStatsView",
+          "adminGeofenceView",
+          "adminUsersView",
+          "adminLogsView",
+        ].forEach((id) => {
+          document.getElementById(id).classList.add("hidden");
+        });
+        [
+          "btnAdminStats",
+          "btnAdminGeofence",
+          "btnAdminUsers",
+          "btnAdminLogs",
+        ].forEach((id) => {
+          document.getElementById(id).className =
+            "flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all";
+        });
+
+        if (tab === "stats") {
+          document.getElementById("adminStatsView").classList.remove("hidden");
+          document.getElementById("btnAdminStats").className =
+            "flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-center shadow transition-all";
+          loadAdminStats();
+        } else if (tab === "geofence") {
+          document
+            .getElementById("adminGeofenceView")
+            .classList.remove("hidden");
+          document.getElementById("btnAdminGeofence").className =
+            "flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-center shadow transition-all";
+          initAdminMap();
+        } else if (tab === "users") {
+          document.getElementById("adminUsersView").classList.remove("hidden");
+          document.getElementById("btnAdminUsers").className =
+            "flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-center shadow transition-all";
+        } else if (tab === "logs") {
+          document.getElementById("adminLogsView").classList.remove("hidden");
+          document.getElementById("btnAdminLogs").className =
+            "flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-center shadow transition-all";
+          loadAdminLogs();
+        }
+      }
+
+      function initAdminMap() {
+        if (!systemSettings) return;
+        const officeLatLng = [systemSettings.lat, systemSettings.lng];
+
+        if (!adminMap) {
+          adminMap = L.map("adminMap").setView(officeLatLng, 16);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+          }).addTo(adminMap);
+        } else {
+          adminMap.setView(officeLatLng, 16);
+        }
+
+        if (adminMarker) adminMap.removeLayer(adminMarker);
+        if (adminCircle) adminMap.removeLayer(adminCircle);
+
+        adminMarker = L.marker(officeLatLng, { draggable: true }).addTo(
+          adminMap,
+        );
+        adminCircle = L.circle(officeLatLng, {
+          color: "#2563eb",
+          fillColor: "#3b82f6",
+          fillOpacity: 0.25,
+          radius: systemSettings.radius,
+        }).addTo(adminMap);
+
+        adminMarker.on("dragend", function (e) {
+          const coord = e.target.getLatLng();
+          adminCircle.setLatLng(coord);
+          document.getElementById("adminLatVal").innerText =
+            coord.lat.toFixed(6);
+          document.getElementById("adminLngVal").innerText =
+            coord.lng.toFixed(6);
+        });
+
+        setTimeout(() => adminMap.invalidateSize(), 300);
+      }
+
+      function loadAdminStats() {
+        google.script.run
+          .withSuccessHandler((s) => {
+            document.getElementById("statTotalPegawai").innerText =
+              s.totalPegawai;
+            document.getElementById("statTotalHariIni").innerText =
+              s.totalAbsenHariIni;
+            document.getElementById("statBerhasil").innerText = s.totalBerhasil;
+            document.getElementById("statDitolak").innerText = s.totalDitolak;
+          })
+          .getAdminDashboardStats();
+      }
+
+      function saveAdminSettings() {
+        if (!adminMarker) return;
+        const pos = adminMarker.getLatLng();
+        const radius = parseFloat(document.getElementById("adminRadius").value);
+        const checkInStart = document.getElementById("adminCheckInStart").value;
+        const checkInEnd = document.getElementById("adminCheckInEnd").value;
+        const checkOutStart =
+          document.getElementById("adminCheckOutStart").value;
+        const checkOutEnd = document.getElementById("adminCheckOutEnd").value;
+
+        google.script.run
+          .withSuccessHandler((res) => {
+            alert(res.message);
+            fetchInitialData();
+          })
+          .updateSettings(
+            pos.lat,
+            pos.lng,
+            radius,
+            checkInStart,
+            checkInEnd,
+            checkOutStart,
+            checkOutEnd,
+          );
+      }
+
+      function handleAddUser() {
+        const nip = document.getElementById("newNip").value.trim();
+        const nama = document.getElementById("newNama").value.trim();
+        const role = document.getElementById("newRole").value;
+        const wa = document.getElementById("newWa").value.trim();
+        const pin = document.getElementById("newPin").value.trim();
+
+        if (!nip || !nama) return alert("NIP dan Nama Pegawai wajib diisi!");
+
+        google.script.run
+          .withSuccessHandler((res) => {
+            alert(res.message);
+            if (res.success) {
+              document.getElementById("newNip").value = "";
+              document.getElementById("newNama").value = "";
+              document.getElementById("newWa").value = "";
+              document.getElementById("newPin").value = "";
+            }
+          })
+          .addUser(nip, nama, role, wa, pin);
+      }
+
+      function loadAdminLogs() {
+        const d = document.getElementById("filterDate").value;
+        const m = document.getElementById("filterMonth").value;
+
+        google.script.run
+          .withSuccessHandler((logs) => {
+            const tbody = document.getElementById("adminLogTable");
+            tbody.innerHTML = "";
+            if (logs.length === 0) {
+              tbody.innerHTML =
+                '<tr><td colspan="4" class="p-4 text-center text-slate-400">Tidak ada data.</td></tr>';
+              return;
+            }
+            logs.forEach((l) => {
+              tbody.innerHTML += `
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="p-3">
+                <div class="font-bold text-slate-800">${l.nama}</div>
+                <div class="text-[9px] text-slate-400">NIP: ${l.nip}</div>
+              </td>
+              <td class="p-3">
+                <div class="font-semibold text-slate-700">${l.tipe}</div>
+                <div class="text-[9px] text-slate-400">${l.timestamp}</div>
+              </td>
+              <td class="p-3">
+                <span class="px-2 py-0.5 rounded text-[9px] font-bold ${l.status.includes("BERHASIL") ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}">${l.status}</span>
+                ${l.durasi !== "" ? `<div class="text-[9px] text-slate-500 mt-1">${l.durasi} jam | Rp${Number(l.transport).toLocaleString("id-ID")}</div>` : ""}
+              </td>
+              <td class="p-3 text-center">
+                <a href="${l.foto}" target="_blank" class="text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-image text-sm"></i></a>
+              </td>
+            </tr>
+          `;
+            });
+          })
+          .getAttendanceLogs(d, m, "");
+      }
+
+      function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000;
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLon = ((lon2 - lon1) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      }
+    </script>
+  </body>
+</html>
