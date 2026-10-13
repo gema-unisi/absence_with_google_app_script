@@ -2,7 +2,10 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Smart Presensi GPS & Selfie</title>
 
     <!-- Google Fonts & Tailwind CSS CDN -->
@@ -33,426 +36,458 @@
       }
       #map,
       #adminMap {
-        height: clamp(240px, 34vw, 380px);
+        height: 300px;
         width: 100%;
         border-radius: 1.25rem;
         z-index: 1;
       }
+      /* Modern Glass Effect */
       .glass-card {
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
       }
-      .soft-shadow {
-        box-shadow: 0 10px 40px -10px rgba(37, 99, 235, 0.08);
-      }
-
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #f1f5f9;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #bfdbfe;
-        border-radius: 9999px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #60a5fa;
-      }
-
-      @media (max-width: 640px) {
-        #map,
-        #adminMap {
-          height: 250px;
-        }
+      .glass-header {
+        background: rgba(30, 58, 138, 0.95);
+        backdrop-filter: blur(12px);
       }
     </style>
   </head>
   <body
-    class="bg-slate-50 text-slate-700 min-h-screen flex flex-col justify-between antialiased selection:bg-blue-500 selection:text-white"
+    class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between antialiased selection:bg-blue-500 selection:text-white"
   >
     <!-- ================= LAYAR LOGIN ================= -->
     <div
       id="loginScreen"
-      class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10 bg-gradient-to-br from-blue-100 via-sky-50 to-white overflow-hidden"
+      class="relative isolate flex min-h-screen min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-br from-blue-50 via-white to-sky-100 px-4 py-6 sm:px-6 sm:py-10 lg:px-8"
     >
-      <!-- Ornamen Latar Belakang Soft Blue -->
+      <!-- Background Decorations -->
       <div
-        class="absolute -top-24 -left-24 w-96 h-96 bg-blue-300/30 rounded-full blur-3xl pointer-events-none"
-      ></div>
-      <div
-        class="absolute -bottom-24 -right-24 w-96 h-96 bg-sky-300/30 rounded-full blur-3xl pointer-events-none"
+        aria-hidden="true"
+        class="pointer-events-none absolute -left-24 -top-24 -z-10 h-64 w-64 rounded-full bg-blue-200/50 blur-3xl sm:h-80 sm:w-80"
       ></div>
 
       <div
-        class="relative glass-card p-6 sm:p-10 rounded-[2rem] shadow-2xl shadow-blue-900/10 w-full max-w-md space-y-6 border border-white"
+        aria-hidden="true"
+        class="pointer-events-none absolute -bottom-24 -right-24 -z-10 h-72 w-72 rounded-full bg-sky-200/60 blur-3xl sm:h-96 sm:w-96"
+      ></div>
+
+      <div
+        class="w-full max-w-md rounded-3xl border border-blue-100/80 bg-white/90 p-5 shadow-xl shadow-blue-900/[0.06] backdrop-blur-xl sm:p-8 md:p-9 lg:rounded-[2rem] lg:p-10"
       >
-        <div class="text-center space-y-2.5">
+        <!-- Header -->
+        <div class="mb-8 text-center sm:mb-10">
           <div
-            class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-blue-600 to-sky-400 text-white rounded-2xl mb-1 shadow-lg shadow-blue-500/30"
+            class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/20 sm:h-[4.5rem] sm:w-[4.5rem] sm:rounded-3xl"
           >
-            <i class="fa-solid fa-location-dot text-2xl"></i>
+            <i class="fa-solid fa-location-dot text-3xl sm:text-4xl"></i>
           </div>
+
           <h2
-            class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight"
+            class="text-2xl font-extrabold tracking-tight text-slate-800 sm:text-3xl"
           >
-            Smart Presensi
+            Smart <span class="text-blue-600">Presensi</span>
           </h2>
-          <p class="text-xs sm:text-sm text-slate-500 font-medium">
-            Masuk menggunakan NIP dan PIN Keamanan Anda
+
+          <p class="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500">
+            Sistem presensi pegawai yang praktis, aman, dan terintegrasi.
           </p>
+
+          <div class="mx-auto mt-5 h-1 w-12 rounded-full bg-blue-500/70"></div>
         </div>
 
-        <div class="space-y-4">
+        <!-- Login Form -->
+        <div class="space-y-5 sm:space-y-6">
+          <!-- NIP -->
           <div>
             <label
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5"
-              >NIP (Nomor Induk Pegawai)</label
+              for="loginNip"
+              class="mb-2 block text-sm font-semibold text-slate-700"
             >
-            <div class="relative">
-              <i
-                class="fa-solid fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-blue-500 text-sm"
-              ></i>
+              NIP (Nomor Induk Pegawai)
+            </label>
+
+            <div class="group relative">
+              <div
+                class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4"
+              >
+                <i
+                  class="fa-solid fa-id-card text-base text-blue-400 transition-colors group-focus-within:text-blue-600"
+                ></i>
+              </div>
+
               <input
                 type="text"
                 id="loginNip"
-                placeholder="Contoh: 1001 atau 9999"
-                class="w-full bg-blue-50/50 hover:bg-blue-50/80 focus:bg-white border border-blue-100 rounded-2xl pl-11 pr-4 py-3.5 text-xs sm:text-sm font-semibold text-slate-700 focus:ring-4 focus:ring-blue-500/15 focus:border-blue-500 outline-none transition-all"
+                placeholder="Masukkan NIP Anda"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-3.5 pl-11 pr-4 text-base font-medium text-slate-700 outline-none transition-all placeholder:font-normal placeholder:text-slate-400 hover:border-blue-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:text-sm"
               />
             </div>
           </div>
 
+          <!-- PIN -->
           <div>
             <label
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5"
-              >PIN Keamanan</label
+              for="loginPin"
+              class="mb-2 block text-sm font-semibold text-slate-700"
             >
-            <div class="relative">
-              <i
-                class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-blue-500 text-sm"
-              ></i>
+              PIN Keamanan
+            </label>
+
+            <div class="group relative">
+              <div
+                class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4"
+              >
+                <i
+                  class="fa-solid fa-lock text-base text-blue-400 transition-colors group-focus-within:text-blue-600"
+                ></i>
+              </div>
+
               <input
                 type="password"
                 id="loginPin"
-                placeholder="Default: 1234"
-                class="w-full bg-blue-50/50 hover:bg-blue-50/80 focus:bg-white border border-blue-100 rounded-2xl pl-11 pr-4 py-3.5 text-xs sm:text-sm font-semibold text-slate-700 focus:ring-4 focus:ring-blue-500/15 focus:border-blue-500 outline-none transition-all"
+                placeholder="Masukkan PIN Anda"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-3.5 pl-11 pr-4 text-base font-medium text-slate-700 outline-none transition-all placeholder:font-normal placeholder:text-slate-400 hover:border-blue-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:text-sm"
               />
             </div>
           </div>
 
+          <!-- Login Button -->
           <button
             id="btnLogin"
             onclick="handleLogin()"
-            class="w-full bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-600 active:scale-[0.99] text-white font-bold py-3.5 rounded-2xl text-xs sm:text-sm shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center space-x-2"
+            class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all duration-200 hover:bg-blue-700 hover:shadow-blue-600/30 active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-blue-500/20"
           >
-            <span id="loginBtnText"
-              ><i class="fa-solid fa-right-to-bracket mr-1.5"></i> Masuk
-              Sistem</span
-            >
+            <span id="loginBtnText">
+              <i class="fa-solid fa-right-to-bracket mr-2"></i>Masuk Sistem
+            </span>
           </button>
         </div>
 
+        <!-- Demo Accounts -->
         <div
-          class="p-4 bg-blue-50/60 border border-blue-100 rounded-2xl text-xs text-slate-600 space-y-1.5"
+          class="mt-7 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 sm:mt-8 sm:p-5"
         >
-          <p class="font-bold text-blue-700 flex items-center">
-            <i class="fa-solid fa-circle-info mr-1.5 text-blue-500"></i> Akun
-            Demo Default:
-          </p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1 text-[11px]">
-            <div class="bg-white/80 p-2 rounded-xl border border-blue-100/60">
-              <span class="font-bold text-slate-700 block">Pegawai</span>
-              NIP:
-              <code class="text-blue-600 font-bold">1001</code>
-              | PIN:
-              <code class="text-blue-600 font-bold">1234</code>
+          <div class="mb-3 flex items-center gap-2">
+            <div
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600"
+            >
+              <i class="fa-solid fa-circle-info"></i>
             </div>
-            <div class="bg-white/80 p-2 rounded-xl border border-blue-100/60">
-              <span class="font-bold text-slate-700 block">Admin</span>
-              NIP:
-              <code class="text-blue-600 font-bold">9999</code>
-              | PIN:
-              <code class="text-blue-600 font-bold">1234</code>
+
+            <div>
+              <p class="text-sm font-bold text-slate-700">Akun Demo</p>
+              <p class="text-xs text-slate-500">
+                Gunakan untuk pengujian sistem
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <!-- Pegawai -->
+            <div class="rounded-xl border border-blue-100/80 bg-white/90 p-3">
+              <div class="mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-user text-xs text-blue-500"></i>
+                <span class="text-xs font-bold text-slate-700">Pegawai</span>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                <span class="text-slate-500">
+                  NIP:
+                  <code
+                    class="ml-1 rounded-md bg-blue-50 px-2 py-1 font-bold text-blue-700"
+                    >1001</code
+                  >
+                </span>
+
+                <span class="text-slate-500">
+                  PIN:
+                  <code
+                    class="ml-1 rounded-md bg-blue-50 px-2 py-1 font-bold text-blue-700"
+                    >1234</code
+                  >
+                </span>
+              </div>
+            </div>
+
+            <!-- Admin -->
+            <div class="rounded-xl border border-blue-100/80 bg-white/90 p-3">
+              <div class="mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-user-shield text-xs text-blue-500"></i>
+                <span class="text-xs font-bold text-slate-700"
+                  >Administrator</span
+                >
+              </div>
+
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                <span class="text-slate-500">
+                  NIP:
+                  <code
+                    class="ml-1 rounded-md bg-blue-50 px-2 py-1 font-bold text-blue-700"
+                    >9999</code
+                  >
+                </span>
+
+                <span class="text-slate-500">
+                  PIN:
+                  <code
+                    class="ml-1 rounded-md bg-blue-50 px-2 py-1 font-bold text-blue-700"
+                    >1234</code
+                  >
+                </span>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- Footer -->
+        <p class="mt-6 text-center text-xs text-slate-400">
+          Smart Presensi
+          <span class="mx-1 text-blue-300">•</span>
+          Sistem Informasi Kehadiran Pegawai
+        </p>
       </div>
     </div>
 
     <!-- ================= CONTAINER UTAMA APLIKASI ================= -->
     <div
       id="appScreen"
-      class="hidden min-h-screen bg-gradient-to-b from-blue-50/50 via-slate-50 to-slate-100/80 flex flex-col justify-between"
+      class="hidden min-h-screen bg-slate-50 flex flex-col justify-between"
     >
-      <!-- Header Responsif -->
       <header
-        class="bg-white/85 backdrop-blur-md border-b border-blue-100 sticky top-0 z-50 shadow-sm"
+        class="sticky top-0 z-50 border-b border-blue-100/80 bg-white/90 text-slate-800 shadow-sm shadow-blue-900/[0.04] backdrop-blur-xl"
       >
         <div
-          class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center"
+          class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 md:px-8 md:py-4"
         >
-          <div class="flex items-center space-x-3.5 min-w-0">
+          <!-- User Profile -->
+          <div class="flex min-w-0 items-center gap-3 sm:gap-3.5">
             <div
-              class="w-10 h-10 sm:w-11 sm:h-11 shrink-0 bg-gradient-to-tr from-blue-600 to-sky-400 rounded-2xl flex items-center justify-center text-white shadow-md shadow-blue-500/20"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20 sm:h-12 sm:w-12 sm:rounded-2xl"
             >
-              <i class="fa-solid fa-user-check text-base sm:text-lg"></i>
+              <i class="fa-solid fa-user-check text-lg sm:text-xl"></i>
             </div>
+
             <div class="min-w-0">
               <h1
-                class="font-extrabold text-sm sm:text-base text-slate-800 leading-tight truncate"
                 id="userDisplayName"
+                class="truncate text-sm font-bold leading-tight tracking-tight text-slate-800 sm:text-base"
               >
                 Nama User
               </h1>
+
               <p
-                class="text-[11px] sm:text-xs text-blue-600 font-semibold"
                 id="userDisplayNip"
+                class="mt-1 truncate text-[11px] font-medium tracking-wide text-slate-500 sm:text-xs"
               >
                 NIP: -
               </p>
             </div>
           </div>
 
-          <div class="flex shrink-0 items-center space-x-2.5 sm:space-x-3">
+          <!-- Role & Logout -->
+          <div class="flex shrink-0 items-center gap-2 sm:gap-3">
             <span
               id="roleBadge"
-              class="bg-blue-50 border border-blue-200 text-[10px] sm:text-xs text-blue-700 px-3 py-1 rounded-full font-extrabold uppercase tracking-wider"
-              >Role</span
+              class="inline-flex max-w-[120px] items-center gap-1.5 truncate rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-blue-700 sm:max-w-none sm:px-3.5 sm:text-xs"
             >
+              <i class="fa-solid fa-shield-halved text-[10px]"></i>
+              Role
+            </span>
+
             <button
+              type="button"
               onclick="handleLogout()"
-              class="bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-200/60 hover:border-rose-500 p-2.5 rounded-xl text-xs transition-all duration-200 shadow-sm"
               title="Logout"
+              aria-label="Logout"
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-all duration-200 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 active:scale-95 focus:outline-none focus:ring-4 focus:ring-rose-500/10 sm:h-10 sm:w-10"
             >
-              <i class="fa-solid fa-power-off"></i>
+              <i class="fa-solid fa-power-off text-sm"></i>
             </button>
           </div>
         </div>
       </header>
 
       <main
-        class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6 flex-grow"
+        class="max-w-6xl mx-auto w-full px-4 md:px-8 py-6 space-y-6 flex-grow"
       >
         <!-- ================= 1. DASHBOARD PEGAWAI ================= -->
         <div id="pegawaiDashboard" class="hidden space-y-6">
-          <!-- Navigasi Tab Pegawai -->
-          <div class="max-w-md mx-auto">
-            <div
-              class="bg-white/90 rounded-2xl p-1.5 flex soft-shadow border border-blue-100 text-xs sm:text-sm font-bold"
+          <!-- Tab Responsif -->
+          <div
+            class="bg-white rounded-[1.5rem] p-1.5 flex shadow-sm border border-slate-100 text-sm font-bold max-w-md mx-auto"
+          >
+            <button
+              onclick="switchPegawaiTab('presensi')"
+              id="btnPegawaiPresensi"
+              class="flex-1 py-3 rounded-2xl bg-blue-600 text-white text-center shadow-md shadow-blue-500/20 transition-all font-semibold"
             >
-              <button
-                onclick="switchPegawaiTab('presensi')"
-                id="btnPegawaiPresensi"
-                class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-center shadow transition-all"
-              >
-                <i class="fa-solid fa-camera mr-1.5"></i> Form Absen
-              </button>
-              <button
-                onclick="switchPegawaiTab('riwayat')"
-                id="btnPegawaiRiwayat"
-                class="flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all"
-              >
-                <i class="fa-solid fa-clock-rotate-left mr-1.5"></i> Riwayat
-                Saya
-              </button>
-            </div>
+              <i class="fa-solid fa-camera mr-1.5"></i> Form Absen
+            </button>
+            <button
+              onclick="switchPegawaiTab('riwayat')"
+              id="btnPegawaiRiwayat"
+              class="flex-1 py-3 rounded-2xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 text-center transition-all font-semibold"
+            >
+              <i class="fa-solid fa-clock-rotate-left mr-1.5"></i> Riwayat Saya
+            </button>
           </div>
 
           <!-- FORM ABSENSI VIEW -->
-          <div
-            id="pegawaiFormView"
-            class="space-y-5 md:space-y-0 md:grid md:grid-cols-2 md:gap-6 items-start"
-          >
-            <!-- Kartu Peta Geofencing -->
-            <div
-              class="bg-white p-4 sm:p-6 rounded-3xl soft-shadow border border-blue-100/80 space-y-4 h-full flex flex-col justify-between"
-            >
-              <div class="flex flex-wrap justify-between items-center gap-2">
-                <div class="flex items-center space-x-2">
-                  <div
-                    class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"
-                  >
-                    <i class="fa-solid fa-map-pin text-sm"></i>
-                  </div>
+          <div id="pegawaiFormView" class="space-y-6">
+            <!-- Layout Grid untuk Desktop & Tablet -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Map Card -->
+              <div
+                class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 space-y-3 hover:shadow-md transition-shadow"
+              >
+                <div class="flex justify-between items-center mb-1">
                   <span
-                    class="text-xs sm:text-sm font-extrabold text-slate-700 uppercase tracking-wider"
-                    >Geofencing GPS</span
+                    class="text-xs font-extrabold text-slate-500 uppercase tracking-widest"
+                    ><i class="fa-solid fa-map-pin mr-1.5 text-blue-500"></i>
+                    Geofencing GPS</span
+                  >
+                  <span
+                    id="distanceInfo"
+                    class="text-[11px] px-3 py-1 rounded-full bg-slate-100 font-bold text-slate-600 shadow-inner"
+                    >Mencari GPS...</span
                   >
                 </div>
-                <span
-                  id="distanceInfo"
-                  class="text-[11px] sm:text-xs px-3 py-1 rounded-full bg-blue-50 font-bold text-blue-600 border border-blue-100"
-                  >Mencari GPS...</span
-                >
+                <div id="map" class="shadow-inner border border-slate-50"></div>
               </div>
-              <div
-                id="map"
-                class="border border-blue-100 shadow-inner flex-grow"
-              ></div>
-            </div>
 
-            <!-- Kartu Kamera Selfie -->
-            <div
-              class="bg-white p-4 sm:p-6 rounded-3xl soft-shadow border border-blue-100/80 text-center space-y-4 h-full flex flex-col justify-between"
-            >
-              <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                  <div
-                    class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center"
-                  >
-                    <i class="fa-solid fa-camera-retro text-sm"></i>
-                  </div>
+              <!-- Camera Card -->
+              <div
+                class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col space-y-4 hover:shadow-md transition-shadow"
+              >
+                <div class="flex justify-between items-center mb-1">
                   <span
-                    class="text-xs sm:text-sm font-extrabold text-slate-700 uppercase tracking-wider block text-left"
+                    class="text-xs font-extrabold text-slate-500 uppercase tracking-widest text-left"
                   >
+                    <i
+                      class="fa-solid fa-camera-retro mr-1.5 text-blue-500"
+                    ></i>
                     Verification Selfie
                   </span>
+                  <button
+                    type="button"
+                    onclick="toggleCameraFacing()"
+                    class="text-xs text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-100 transition-colors flex items-center space-x-1.5"
+                  >
+                    <i class="fa-solid fa-rotate text-sm"></i>
+                    <span class="hidden sm:inline">Ganti Kamera</span>
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onclick="toggleCameraFacing()"
-                  class="text-[11px] sm:text-xs bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-xl font-bold transition-colors flex items-center space-x-1.5"
-                >
-                  <i class="fa-solid fa-rotate text-xs"></i>
-                  <span>Ganti Kamera</span>
-                </button>
-              </div>
-
-              <div
-                class="relative w-full h-60 sm:h-72 lg:h-80 bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-blue-100 shadow-inner"
-              >
-                <video
-                  id="videoPreview"
-                  autoplay
-                  playsinline
-                  muted
-                  class="w-full h-full object-cover hidden"
-                ></video>
-                <canvas id="canvasPreview" class="hidden"></canvas>
-                <img
-                  id="imagePreview"
-                  class="hidden w-full h-full object-cover"
-                />
 
                 <div
-                  id="cameraPlaceholder"
-                  class="absolute text-slate-400 text-center space-y-2.5 p-4"
+                  class="relative w-full flex-grow min-h-[260px] bg-slate-900 rounded-[1.25rem] overflow-hidden flex items-center justify-center border-4 border-slate-100 shadow-inner group"
                 >
-                  <div
-                    class="w-14 h-14 bg-slate-800/80 rounded-2xl flex items-center justify-center mx-auto text-sky-400 ring-1 ring-white/10"
-                  >
-                    <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
-                  </div>
-                  <p class="text-xs font-semibold text-slate-300">
-                    Menghubungkan Kamera...
-                  </p>
-                </div>
-                <button
-                  id="cameraStartButton"
-                  type="button"
-                  onclick="startCameraAuto()"
-                  class="hidden absolute bottom-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg"
-                >
-                  <i class="fa-solid fa-camera mr-1.5"></i> Aktifkan Kamera
-                </button>
-              </div>
-
-              <!-- Tombol Aksi Kamera Stream & Native Input -->
-              <div
-                id="cameraActionButtons"
-                class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"
-              >
-                <button
-                  type="button"
-                  onclick="takeSelfie()"
-                  class="bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-600 active:scale-95 text-white py-3 rounded-2xl text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 transition-all flex items-center justify-center space-x-2"
-                >
-                  <i class="fa-solid fa-camera text-sm"></i>
-                  <span>Ambil Foto</span>
-                </button>
-
-                <!-- Membuka Kamera Bawaan HP Langsung -->
-                <label
-                  class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200/80 hover:border-blue-200 py-3 rounded-2xl text-xs sm:text-sm font-bold cursor-pointer transition-all flex items-center justify-center space-x-2"
-                >
-                  <i class="fa-solid fa-file-image text-blue-500"></i>
-                  <span>Kamera Perangkat</span>
-                  <input
-                    type="file"
-                    id="nativeCameraInput"
-                    accept="image/*"
-                    capture="user"
-                    class="hidden"
-                    onchange="handleNativeCameraUpload(event)"
+                  <video
+                    id="videoPreview"
+                    autoplay
+                    playsinline
+                    muted
+                    class="w-full h-full object-cover hidden"
+                  ></video>
+                  <canvas id="canvasPreview" class="hidden"></canvas>
+                  <img
+                    id="imagePreview"
+                    class="hidden w-full h-full object-cover"
                   />
-                </label>
-              </div>
 
-              <!-- Tombol Foto Ulang ketika foto terambil -->
-              <div id="cameraRetakeButton" class="hidden">
-                <button
-                  type="button"
-                  onclick="retakePhoto()"
-                  class="w-full bg-blue-50 hover:bg-blue-100 active:scale-95 text-blue-700 border border-blue-200 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center space-x-2"
+                  <div
+                    id="cameraPlaceholder"
+                    class="absolute text-slate-400 text-center space-y-3 p-4"
+                  >
+                    <div
+                      class="w-14 h-14 bg-slate-800 rounded-full flex items-center justify-center mx-auto text-blue-400 shadow-lg"
+                    >
+                      <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
+                    </div>
+                    <p class="text-xs font-semibold tracking-wide">
+                      Menghubungkan Kamera...
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Tombol Aksi Kamera -->
+                <div
+                  id="cameraActionButtons"
+                  class="flex flex-col sm:flex-row gap-3 mt-auto"
                 >
-                  <i class="fa-solid fa-arrows-rotate text-xs"></i>
-                  <span>Foto Ulang</span>
-                </button>
+                  <button
+                    type="button"
+                    onclick="takeSelfie()"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white py-3.5 rounded-2xl text-sm font-bold shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2"
+                  >
+                    <i class="fa-solid fa-camera text-base"></i>
+                    <span>Ambil Foto</span>
+                  </button>
+
+                  <label
+                    class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-3.5 rounded-2xl text-sm font-bold cursor-pointer transition-all flex items-center justify-center space-x-2"
+                  >
+                    <i class="fa-solid fa-file-image"></i>
+                    <span>Kamera Perangkat</span>
+                    <input
+                      type="file"
+                      id="nativeCameraInput"
+                      accept="image/*"
+                      capture="user"
+                      class="hidden"
+                      onchange="handleNativeCameraUpload(event)"
+                    />
+                  </label>
+                </div>
+
+                <!-- Tombol Foto Ulang -->
+                <div id="cameraRetakeButton" class="hidden mt-auto">
+                  <button
+                    type="button"
+                    onclick="retakePhoto()"
+                    class="w-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 py-3.5 rounded-2xl text-sm font-bold transition-all flex items-center justify-center space-x-2"
+                  >
+                    <i class="fa-solid fa-arrows-rotate text-base"></i>
+                    <span>Foto Ulang</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <!-- Tombol Submit Presensi -->
-            <div
-              class="grid grid-cols-2 gap-3 sm:gap-4 pt-1 md:col-span-2 bg-white p-4 sm:p-5 rounded-3xl soft-shadow border border-blue-100/80"
-            >
+            <!-- Action Button Bawah Responsif -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-2">
               <button
                 onclick="submitPresence('MASUK')"
-                class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white py-3.5 sm:py-4 rounded-2xl font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center space-x-2"
+                class="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-[0.98] text-white py-4 rounded-2xl font-extrabold text-sm shadow-xl shadow-emerald-500/30 transition-all flex items-center justify-center space-x-2"
               >
-                <i
-                  class="fa-solid fa-right-to-bracket text-sm sm:text-base"
-                ></i>
-                <span>Absen Masuk</span>
+                <i class="fa-solid fa-right-to-bracket text-lg"></i>
+                <span class="tracking-wide">ABSEN MASUK</span>
               </button>
               <button
                 onclick="submitPresence('PULANG')"
-                class="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 active:scale-95 text-white py-3.5 sm:py-4 rounded-2xl font-extrabold text-xs sm:text-sm shadow-lg shadow-rose-500/20 transition-all flex items-center justify-center space-x-2"
+                class="flex-1 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 active:scale-[0.98] text-white py-4 rounded-2xl font-extrabold text-sm shadow-xl shadow-rose-500/30 transition-all flex items-center justify-center space-x-2"
               >
-                <i
-                  class="fa-solid fa-right-from-bracket text-sm sm:text-base"
-                ></i>
-                <span>Absen Pulang</span>
+                <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                <span class="tracking-wide">ABSEN PULANG</span>
               </button>
             </div>
           </div>
 
-          <!-- RIWAYAT VIEW -->
-          <div id="pegawaiRiwayatView" class="hidden">
+          <div
+            id="pegawaiRiwayatView"
+            class="hidden space-y-4 max-w-3xl mx-auto"
+          >
             <div
-              class="bg-white p-5 sm:p-6 rounded-3xl border border-blue-100/80 soft-shadow space-y-4 max-w-4xl mx-auto"
+              class="bg-white p-5 md:p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4"
             >
-              <div
-                class="flex items-center space-x-2.5 border-b border-slate-100 pb-3"
+              <h3
+                class="text-xs font-extrabold text-slate-500 uppercase tracking-widest"
               >
-                <div
-                  class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"
-                >
-                  <i class="fa-solid fa-history text-sm"></i>
-                </div>
-                <h3
-                  class="text-xs sm:text-sm font-extrabold text-slate-700 uppercase tracking-wider"
-                >
-                  Log Presensi Pribadi
-                </h3>
-              </div>
-              <div
-                id="userLogList"
-                class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs"
-              >
-                <p class="text-slate-400 text-center py-8 md:col-span-2">
+                <i class="fa-solid fa-history text-blue-500 mr-1.5"></i> Log
+                Presensi Pribadi
+              </h3>
+              <div id="userLogList" class="space-y-3 text-sm">
+                <p class="text-slate-400 text-center py-10 font-medium">
                   Memuat data riwayat...
                 </p>
               </div>
@@ -462,436 +497,319 @@
 
         <!-- ================= 2. DASHBOARD ADMIN ================= -->
         <div id="adminDashboard" class="hidden space-y-6">
-          <!-- Navigasi Tab Admin Responsif -->
-          <div class="max-w-2xl mx-auto">
-            <div
-              class="bg-white/90 rounded-2xl p-1.5 grid grid-cols-2 sm:grid-cols-4 gap-1 soft-shadow border border-blue-100 text-xs font-bold"
+          <!-- Tab Admin Desktop & Mobile -->
+          <div
+            class="bg-white rounded-[1.5rem] p-1.5 flex flex-wrap md:flex-nowrap gap-1 shadow-sm border border-slate-100 text-xs sm:text-sm font-bold"
+          >
+            <button
+              onclick="switchAdminTab('stats')"
+              id="btnAdminStats"
+              class="flex-1 py-3 px-2 rounded-2xl bg-blue-600 text-white text-center shadow-md shadow-blue-500/20 transition-all font-semibold"
             >
-              <button
-                onclick="switchAdminTab('stats')"
-                id="btnAdminStats"
-                class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-center shadow transition-all"
-              >
-                <i class="fa-solid fa-chart-pie mr-1"></i> Statistik
-              </button>
-              <button
-                onclick="switchAdminTab('geofence')"
-                id="btnAdminGeofence"
-                class="flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all"
-              >
-                <i class="fa-solid fa-map-location-dot mr-1"></i> Geofence
-              </button>
-              <button
-                onclick="switchAdminTab('users')"
-                id="btnAdminUsers"
-                class="flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all"
-              >
-                <i class="fa-solid fa-users mr-1"></i> Pegawai
-              </button>
-              <button
-                onclick="switchAdminTab('logs')"
-                id="btnAdminLogs"
-                class="flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all"
-              >
-                <i class="fa-solid fa-file-lines mr-1"></i> Laporan
-              </button>
-            </div>
+              Statistik
+            </button>
+            <button
+              onclick="switchAdminTab('geofence')"
+              id="btnAdminGeofence"
+              class="flex-1 py-3 px-2 rounded-2xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 text-center transition-all font-semibold"
+            >
+              Geofence
+            </button>
+            <button
+              onclick="switchAdminTab('users')"
+              id="btnAdminUsers"
+              class="flex-1 py-3 px-2 rounded-2xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 text-center transition-all font-semibold"
+            >
+              Pegawai
+            </button>
+            <button
+              onclick="switchAdminTab('logs')"
+              id="btnAdminLogs"
+              class="flex-1 py-3 px-2 rounded-2xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 text-center transition-all font-semibold"
+            >
+              Laporan
+            </button>
           </div>
 
-          <!-- TAB 1: STATISTIK -->
           <div id="adminStatsView" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div
-                class="bg-white p-5 sm:p-6 rounded-3xl border border-blue-100/80 soft-shadow flex items-center justify-between"
+                class="bg-white p-5 md:p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:-translate-y-1 transition-transform"
               >
-                <div>
-                  <span
-                    class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block"
-                    >Total Pegawai</span
-                  >
-                  <span
-                    id="statTotalPegawai"
-                    class="text-3xl sm:text-4xl font-black text-blue-600 mt-1.5 block"
-                    >0</span
-                  >
-                </div>
                 <div
-                  class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center text-xl"
+                  class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3"
                 >
                   <i class="fa-solid fa-users"></i>
                 </div>
-              </div>
-
-              <div
-                class="bg-white p-5 sm:p-6 rounded-3xl border border-blue-100/80 soft-shadow flex items-center justify-between"
-              >
-                <div>
-                  <span
-                    class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block"
-                    >Presensi Hari Ini</span
-                  >
-                  <span
-                    id="statTotalHariIni"
-                    class="text-3xl sm:text-4xl font-black text-slate-800 mt-1.5 block"
-                    >0</span
-                  >
-                </div>
-                <div
-                  class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-500 flex items-center justify-center text-xl"
+                <span
+                  class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block"
+                  >Total Pegawai</span
                 >
-                  <i class="fa-solid fa-calendar-check"></i>
-                </div>
-              </div>
-
-              <div
-                class="bg-gradient-to-br from-emerald-50 to-teal-50/50 p-5 sm:p-6 rounded-3xl border border-emerald-200/70 soft-shadow flex items-center justify-between"
-              >
-                <div>
-                  <span
-                    class="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider block"
-                    >Dalam Radius</span
-                  >
-                  <span
-                    id="statBerhasil"
-                    class="text-3xl sm:text-4xl font-black text-emerald-700 mt-1.5 block"
-                    >0</span
-                  >
-                </div>
-                <div
-                  class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-xl"
+                <span
+                  id="statTotalPegawai"
+                  class="text-4xl font-black text-blue-600 mt-1 block"
+                  >0</span
                 >
-                  <i class="fa-solid fa-circle-check"></i>
-                </div>
               </div>
-
               <div
-                class="bg-gradient-to-br from-rose-50 to-pink-50/50 p-5 sm:p-6 rounded-3xl border border-rose-200/70 soft-shadow flex items-center justify-between"
+                class="bg-white p-5 md:p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:-translate-y-1 transition-transform"
               >
-                <div>
-                  <span
-                    class="text-[11px] font-extrabold text-rose-600 uppercase tracking-wider block"
-                    >Ditolak (Luar)</span
-                  >
-                  <span
-                    id="statDitolak"
-                    class="text-3xl sm:text-4xl font-black text-rose-700 mt-1.5 block"
-                    >0</span
-                  >
-                </div>
                 <div
-                  class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center text-xl"
+                  class="w-10 h-10 rounded-full bg-slate-50 text-slate-600 flex items-center justify-center mb-3"
                 >
-                  <i class="fa-solid fa-circle-xmark"></i>
+                  <i class="fa-solid fa-calendar-day"></i>
                 </div>
+                <span
+                  class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block"
+                  >Presensi Hari Ini</span
+                >
+                <span
+                  id="statTotalHariIni"
+                  class="text-4xl font-black text-slate-700 mt-1 block"
+                  >0</span
+                >
+              </div>
+              <div
+                class="bg-emerald-50 p-5 md:p-6 rounded-[2rem] border border-emerald-100 hover:-translate-y-1 transition-transform"
+              >
+                <div
+                  class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3"
+                >
+                  <i class="fa-solid fa-check-double"></i>
+                </div>
+                <span
+                  class="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider block"
+                  >Dalam Radius</span
+                >
+                <span
+                  id="statBerhasil"
+                  class="text-4xl font-black text-emerald-600 mt-1 block"
+                  >0</span
+                >
+              </div>
+              <div
+                class="bg-rose-50 p-5 md:p-6 rounded-[2rem] border border-rose-100 hover:-translate-y-1 transition-transform"
+              >
+                <div
+                  class="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mb-3"
+                >
+                  <i class="fa-solid fa-ban"></i>
+                </div>
+                <span
+                  class="text-[11px] font-extrabold text-rose-600 uppercase tracking-wider block"
+                  >Ditolak (Luar)</span
+                >
+                <span
+                  id="statDitolak"
+                  class="text-4xl font-black text-rose-600 mt-1 block"
+                  >0</span
+                >
               </div>
             </div>
           </div>
 
-          <!-- TAB 2: GEOFENCE -->
-          <div id="adminGeofenceView" class="hidden">
+          <div id="adminGeofenceView" class="hidden space-y-4">
             <div
-              class="bg-white p-5 sm:p-7 rounded-3xl soft-shadow border border-blue-100/80 lg:grid lg:grid-cols-12 lg:gap-8 space-y-6 lg:space-y-0 items-start"
+              class="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 grid grid-cols-1 lg:grid-cols-2 gap-8"
             >
-              <!-- Kolom Kiri: Peta Admin -->
-              <div class="lg:col-span-7 space-y-4">
-                <div class="flex justify-between items-center">
-                  <div class="flex items-center space-x-2.5">
-                    <div
-                      class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"
-                    >
-                      <i class="fa-solid fa-map-location-dot"></i>
-                    </div>
-                    <div>
-                      <h3
-                        class="font-extrabold text-slate-800 text-xs sm:text-sm uppercase tracking-wider"
-                      >
-                        Area Geofencing Kantor
-                      </h3>
-                      <p class="text-[11px] text-slate-400">
-                        Geser pin biru untuk menentukan koordinat kantor
-                      </p>
-                    </div>
-                  </div>
+              <div class="space-y-4">
+                <div>
+                  <h3
+                    class="font-extrabold text-slate-700 text-sm uppercase tracking-wider"
+                  >
+                    <i
+                      class="fa-solid fa-map-location-dot text-blue-500 mr-1.5"
+                    ></i>
+                    Area Geofencing Kantor
+                  </h3>
+                  <p class="text-xs text-slate-400 mt-1">
+                    Geser pin biru untuk menentukan koordinat kantor dengan
+                    akurat.
+                  </p>
                 </div>
 
                 <div
                   id="adminMap"
-                  class="border border-blue-100 shadow-inner"
+                  class="shadow-inner border border-slate-50"
                 ></div>
+              </div>
 
-                <div
-                  class="p-3.5 bg-blue-50/60 rounded-2xl text-xs text-slate-600 flex justify-around border border-blue-100 font-mono"
-                >
-                  <div>
-                    <b class="text-slate-500">Lat:</b>
-                    <span id="adminLatVal" class="text-blue-600 font-bold ml-1"
+              <div
+                class="flex flex-col justify-center space-y-5 bg-slate-50 p-6 rounded-[1.5rem] border border-slate-100"
+              >
+                <div class="flex justify-between gap-4">
+                  <div
+                    class="flex-1 bg-white p-3 rounded-xl border border-slate-100 shadow-sm"
+                  >
+                    <span
+                      class="block text-[10px] text-slate-400 font-bold uppercase mb-1"
+                      >Latitude</span
+                    >
+                    <span
+                      id="adminLatVal"
+                      class="text-blue-600 font-mono font-bold text-sm"
                       >-</span
                     >
                   </div>
-                  <div class="border-r border-blue-200"></div>
-                  <div>
-                    <b class="text-slate-500">Lng:</b>
-                    <span id="adminLngVal" class="text-blue-600 font-bold ml-1"
+                  <div
+                    class="flex-1 bg-white p-3 rounded-xl border border-slate-100 shadow-sm"
+                  >
+                    <span
+                      class="block text-[10px] text-slate-400 font-bold uppercase mb-1"
+                      >Longitude</span
+                    >
+                    <span
+                      id="adminLngVal"
+                      class="text-blue-600 font-mono font-bold text-sm"
                       >-</span
                     >
                   </div>
                 </div>
-              </div>
 
-              <!-- Kolom Kanan: Form Pengaturan Jam & Radius -->
-              <div
-                class="lg:col-span-5 bg-slate-50/70 p-4 sm:p-6 rounded-2xl border border-blue-100/60 space-y-4"
-              >
                 <div>
                   <label
-                    class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1.5"
+                    class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block mb-2 ml-1"
                     >Radius Toleransi Presensi (Meter)</label
                   >
                   <input
                     type="number"
                     id="adminRadius"
-                    class="w-full border border-blue-100 bg-white rounded-xl p-3 text-xs sm:text-sm font-semibold focus:ring-4 focus:ring-blue-500/15 focus:border-blue-500 outline-none transition-all"
+                    class="w-full border border-slate-200 bg-white rounded-xl p-3 text-sm font-semibold focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label
-                      class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1.5"
-                      >Masuk mulai</label
-                    >
-                    <input
-                      type="time"
-                      id="adminCheckInStart"
-                      class="w-full border border-blue-100 bg-white rounded-xl p-3 text-xs sm:text-sm font-semibold focus:ring-4 focus:ring-blue-500/15 focus:border-blue-500 outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1.5"
-                      >Masuk sampai</label
-                    >
-                    <input
-                      type="time"
-                      id="adminCheckInEnd"
-                      class="w-full border border-blue-100 bg-white rounded-xl p-3 text-xs sm:text-sm font-semibold focus:ring-4 focus:ring-blue-500/15 focus:border-blue-500 outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1.5"
-                      >Pulang mulai</label
-                    >
-                    <input
-                      type="time"
-                      id="adminCheckOutStart"
-                      class="w-full border border-blue-100 bg-white rounded-xl p-3 text-xs sm:text-sm font-semibold focus:ring-4 focus:ring-blue-500/15 focus:border-blue-500 outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1.5"
-                      >Pulang sampai</label
-                    >
-                    <input
-                      type="time"
-                      id="adminCheckOutEnd"
-                      class="w-full border border-blue-100 bg-white rounded-xl p-3 text-xs sm:text-sm font-semibold focus:ring-4 focus:ring-blue-500/15 focus:border-blue-500 outline-none"
-                    />
-                  </div>
+                <div>
+                  <label
+                    class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block mb-2 ml-1"
+                    >WA Token API (Fonnte)</label
+                  >
+                  <input
+                    type="text"
+                    id="adminWaToken"
+                    class="w-full border border-slate-200 bg-white rounded-xl p-3 text-sm font-semibold focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                    placeholder="Token Fonnte Gateway"
+                  />
                 </div>
-
-                <div
-                  class="p-3.5 bg-blue-50/70 rounded-xl border border-blue-100 space-y-1 text-[11px] text-slate-600"
-                >
-                  <p class="flex items-start">
-                    <i
-                      class="fa-solid fa-circle-check text-blue-500 mt-0.5 mr-2"
-                    ></i>
-                    <span
-                      >Transport Rp150.000/hari diberikan jika durasi kerja
-                      minimal 8 jam.</span
-                    >
-                  </p>
-                  <p class="flex items-start">
-                    <i class="fa-solid fa-key text-blue-500 mt-0.5 mr-2"></i>
-                    <span
-                      >Token Fonnte dikelola di Script Properties sebagai
-                      FONNTE_TOKEN.</span
-                    >
-                  </p>
-                </div>
-
                 <button
                   onclick="saveAdminSettings()"
-                  class="w-full bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-600 active:scale-[0.99] text-white py-3.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg shadow-blue-500/25 transition-all"
+                  class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-600/30 transition-all mt-2"
                 >
                   <i class="fa-solid fa-floppy-disk mr-1.5"></i> Simpan
-                  Pengaturan Kantor
+                  Pengaturan
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- TAB 3: PEGAWAI -->
-          <div id="adminUsersView" class="hidden">
+          <div id="adminUsersView" class="hidden space-y-4 max-w-3xl mx-auto">
             <div
-              class="max-w-2xl mx-auto bg-white p-5 sm:p-7 rounded-3xl soft-shadow border border-blue-100/80 space-y-5"
+              class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 space-y-5"
             >
-              <div
-                class="flex items-center space-x-2.5 border-b border-slate-100 pb-3"
-              >
-                <div
-                  class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"
+              <div>
+                <h3
+                  class="font-extrabold text-slate-700 text-sm uppercase tracking-wider"
                 >
-                  <i class="fa-solid fa-user-plus"></i>
-                </div>
-                <div>
-                  <h3
-                    class="font-extrabold text-slate-800 text-xs sm:text-sm uppercase tracking-wider"
-                  >
-                    Tambah Pegawai Baru
-                  </h3>
-                  <p class="text-[11px] text-slate-400">
-                    Daftarkan akun pegawai atau admin baru ke sistem
-                  </p>
-                </div>
+                  <i class="fa-solid fa-user-plus text-blue-500 mr-1.5"></i>
+                  Tambah Pegawai Baru
+                </h3>
+                <p class="text-xs text-slate-400 mt-1">
+                  Daftarkan akun pegawai atau admin baru ke dalam sistem.
+                </p>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <label
-                    class="text-[11px] font-bold text-slate-500 uppercase block mb-1"
-                    >NIP Pegawai</label
-                  >
-                  <input
-                    type="text"
-                    id="newNip"
-                    placeholder="NIP (Nomor Induk Pegawai)"
-                    class="w-full border border-blue-100 bg-blue-50/30 focus:bg-white rounded-xl p-3 text-xs sm:text-sm font-semibold focus:ring-4 focus:ring-blue-500/15 focus:border-blue-500 outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label
-                    class="text-[11px] font-bold text-slate-500 uppercase block mb-1"
-                    >Nama Lengkap</label
-                  >
-                  <input
-                    type="text"
-                    id="newNama"
-                    placeholder="Nama Lengkap"
-                    class="w-full border border-blue-100 bg-blue-50/30 focus:bg-white rounded-xl p-3 text-xs sm:text-sm font-semibold focus:ring-4 focus:ring-blue-500/15 focus:border-blue-500 outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label
-                    class="text-[11px] font-bold text-slate-500 uppercase block mb-1"
-                    >Role Akses</label
-                  >
-                  <select
-                    id="newRole"
-                    class="w-full border border-blue-100 bg-blue-50/30 focus:bg-white rounded-xl p-3 text-xs sm:text-sm font-semibold focus:ring-4 focus:ring-blue-500/15 focus:border-blue-500 outline-none transition-all"
-                  >
-                    <option value="Pegawai">Pegawai</option>
-                    <option value="Admin">Admin</option>
-                  </select>
-                </div>
-                <div>
-                  <label
-                    class="text-[11px] font-bold text-slate-500 uppercase block mb-1"
-                    >Nomor WhatsApp</label
-                  >
-                  <input
-                    type="text"
-                    id="newWa"
-                    placeholder="No WhatsApp (Contoh: 628123...)"
-                    class="w-full border border-blue-100 bg-blue-50/30 focus:bg-white rounded-xl p-3 text-xs sm:text-sm font-semibold focus:ring-4 focus:ring-blue-500/15 focus:border-blue-500 outline-none transition-all"
-                  />
-                </div>
-                <div class="sm:col-span-2">
-                  <label
-                    class="text-[11px] font-bold text-slate-500 uppercase block mb-1"
-                    >PIN Akses</label
-                  >
-                  <input
-                    type="password"
-                    id="newPin"
-                    placeholder="PIN Akses (Default: 1234)"
-                    class="w-full border border-blue-100 bg-blue-50/30 focus:bg-white rounded-xl p-3 text-xs sm:text-sm font-semibold focus:ring-4 focus:ring-blue-500/15 focus:border-blue-500 outline-none transition-all"
-                  />
-                </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  id="newNip"
+                  placeholder="NIP (Nomor Induk Pegawai)"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-xl p-3.5 text-sm font-semibold focus:bg-white focus:ring-4 focus:ring-blue-500/20 outline-none transition-all"
+                />
+                <input
+                  type="text"
+                  id="newNama"
+                  placeholder="Nama Lengkap"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-xl p-3.5 text-sm font-semibold focus:bg-white focus:ring-4 focus:ring-blue-500/20 outline-none transition-all"
+                />
+                <select
+                  id="newRole"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-xl p-3.5 text-sm font-semibold focus:bg-white focus:ring-4 focus:ring-blue-500/20 outline-none transition-all text-slate-600"
+                >
+                  <option value="Pegawai">Pegawai</option>
+                  <option value="Admin">Admin</option>
+                </select>
+                <input
+                  type="text"
+                  id="newWa"
+                  placeholder="No WhatsApp (Contoh: 628123...)"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-xl p-3.5 text-sm font-semibold focus:bg-white focus:ring-4 focus:ring-blue-500/20 outline-none transition-all"
+                />
+                <input
+                  type="password"
+                  id="newPin"
+                  placeholder="PIN Akses (Default: 1234)"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-xl p-3.5 text-sm font-semibold focus:bg-white focus:ring-4 focus:ring-blue-500/20 outline-none transition-all md:col-span-2"
+                />
               </div>
-
               <button
                 onclick="handleAddUser()"
-                class="w-full bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-600 active:scale-[0.99] text-white py-3.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg shadow-blue-500/25 transition-all"
+                class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/30 transition-all mt-4"
               >
                 <i class="fa-solid fa-plus mr-1.5"></i> Simpan Pegawai Baru
               </button>
             </div>
           </div>
 
-          <!-- TAB 4: LAPORAN -->
           <div id="adminLogsView" class="hidden space-y-4">
             <div
-              class="bg-white p-4 sm:p-5 rounded-3xl border border-blue-100/80 soft-shadow flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+              class="bg-white p-5 rounded-[1.5rem] border border-slate-100 space-y-3 shadow-sm flex flex-col md:flex-row justify-between md:items-center"
             >
-              <div class="flex items-center space-x-2.5">
-                <div
-                  class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"
-                >
-                  <i class="fa-solid fa-filter"></i>
-                </div>
-                <div>
-                  <h3
-                    class="font-extrabold text-slate-800 text-xs sm:text-sm uppercase tracking-wider"
-                  >
-                    Filter Laporan Global
-                  </h3>
-                  <p class="text-[11px] text-slate-400">
-                    Saring log presensi berdasarkan tanggal atau bulan
-                  </p>
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-2.5 sm:w-80">
+              <h3
+                class="font-extrabold text-slate-600 text-xs uppercase tracking-wider mb-2 md:mb-0"
+              >
+                <i class="fa-solid fa-filter mr-1.5 text-blue-500"></i> Filter
+                Laporan
+              </h3>
+              <div class="flex gap-3 w-full md:w-auto">
                 <input
                   type="date"
                   id="filterDate"
                   onchange="loadAdminLogs()"
-                  class="border border-blue-100 bg-blue-50/40 hover:bg-blue-50/80 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                  class="flex-1 border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 outline-none"
                 />
                 <input
                   type="month"
                   id="filterMonth"
                   onchange="loadAdminLogs()"
-                  class="border border-blue-100 bg-blue-50/40 hover:bg-blue-50/80 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                  class="flex-1 border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
             </div>
 
             <div
-              class="bg-white rounded-3xl soft-shadow border border-blue-100/80 overflow-hidden"
+              class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden"
             >
               <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+                <table
+                  class="w-full text-left border-collapse whitespace-nowrap min-w-[600px]"
+                >
                   <thead>
                     <tr
-                      class="bg-blue-50/60 text-[10px] sm:text-xs text-blue-800 uppercase tracking-wider border-b border-blue-100"
+                      class="bg-slate-50 text-[11px] text-slate-500 uppercase tracking-widest border-b border-slate-100"
                     >
-                      <th class="p-3.5 sm:p-4 font-extrabold">Pegawai</th>
-                      <th class="p-3.5 sm:p-4 font-extrabold">Waktu</th>
-                      <th class="p-3.5 sm:p-4 font-extrabold">Status</th>
-                      <th class="p-3.5 sm:p-4 font-extrabold text-center">
-                        Foto
-                      </th>
+                      <th class="p-4 font-extrabold">Pegawai</th>
+                      <th class="p-4 font-extrabold">Waktu</th>
+                      <th class="p-4 font-extrabold">Status</th>
+                      <th class="p-4 font-extrabold text-center">Foto</th>
                     </tr>
                   </thead>
                   <tbody
                     id="adminLogTable"
-                    class="text-xs sm:text-sm divide-y divide-slate-100"
+                    class="text-sm divide-y divide-slate-50"
                   >
                     <tr>
-                      <td colspan="4" class="p-8 text-center text-slate-400">
+                      <td
+                        colspan="4"
+                        class="p-8 text-center text-slate-400 font-medium"
+                      >
                         Memuat laporan...
                       </td>
                     </tr>
@@ -904,7 +822,7 @@
       </main>
 
       <footer
-        class="text-center py-4 text-[11px] text-slate-400 font-medium border-t border-blue-100/60 bg-white/50"
+        class="text-center py-5 text-[11px] text-slate-400 font-semibold tracking-wide"
       >
         Smart Attendance Mobile System &copy; 2026
       </footer>
@@ -936,13 +854,13 @@
         if (!nip || !pin) return alert("Masukkan NIP dan PIN Anda!");
 
         btnText.innerHTML =
-          '<i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Memeriksa...';
+          '<i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i> Memeriksa...';
         btn.disabled = true;
 
         google.script.run
           .withSuccessHandler((res) => {
             btnText.innerHTML =
-              '<i class="fa-solid fa-right-to-bracket mr-1"></i> Masuk Sistem';
+              '<i class="fa-solid fa-right-to-bracket mr-1.5"></i> Masuk Sistem';
             btn.disabled = false;
 
             if (res.success) {
@@ -981,7 +899,7 @@
           })
           .withFailureHandler((err) => {
             btnText.innerHTML =
-              '<i class="fa-solid fa-right-to-bracket mr-1"></i> Masuk Sistem';
+              '<i class="fa-solid fa-right-to-bracket mr-1.5"></i> Masuk Sistem';
             btn.disabled = false;
             alert("Gagal terhubung ke Apps Script: " + err.message);
           })
@@ -1004,14 +922,8 @@
 
             document.getElementById("adminRadius").value =
               systemSettings.radius;
-            document.getElementById("adminCheckInStart").value =
-              systemSettings.checkInStart;
-            document.getElementById("adminCheckInEnd").value =
-              systemSettings.checkInEnd;
-            document.getElementById("adminCheckOutStart").value =
-              systemSettings.checkOutStart;
-            document.getElementById("adminCheckOutEnd").value =
-              systemSettings.checkOutEnd;
+            document.getElementById("adminWaToken").value =
+              systemSettings.waToken;
             document.getElementById("adminLatVal").innerText =
               systemSettings.lat.toFixed(6);
             document.getElementById("adminLngVal").innerText =
@@ -1048,8 +960,8 @@
 
         if (officeCircle) map.removeLayer(officeCircle);
         officeCircle = L.circle(officeLatLng, {
-          color: "#2563eb",
-          fillColor: "#3b82f6",
+          color: "#3b82f6",
+          fillColor: "#60a5fa",
           fillOpacity: 0.2,
           radius: systemSettings.radius,
         }).addTo(map);
@@ -1086,11 +998,11 @@
                 const badge = document.getElementById("distanceInfo");
                 if (dist <= systemSettings.radius) {
                   badge.className =
-                    "text-[11px] sm:text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-bold";
+                    "text-[11px] px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-bold shadow-inner";
                   badge.innerText = `Dalam Radius (${Math.round(dist)}m)`;
                 } else {
                   badge.className =
-                    "text-[11px] sm:text-xs px-3 py-1 rounded-full bg-rose-100 text-rose-700 font-bold";
+                    "text-[11px] px-3 py-1 rounded-full bg-rose-100 text-rose-700 font-bold shadow-inner";
                   badge.innerText = `Luar Radius (${Math.round(dist)}m)`;
                 }
               }
@@ -1102,63 +1014,24 @@
       }
 
       // PENANGANAN STREAM KAMERA (LAPTOP & MOBILE)
-      function isCameraAllowedInThisContext() {
-        const isLocalHost = ["localhost", "127.0.0.1", "::1"].includes(
-          window.location.hostname,
-        );
-        return window.isSecureContext || isLocalHost;
-      }
-
       async function startCameraAuto() {
         const video = document.getElementById("videoPreview");
         const img = document.getElementById("imagePreview");
         const placeholder = document.getElementById("cameraPlaceholder");
-        const startButton = document.getElementById("cameraStartButton");
-
-        if (!video || !placeholder || !startButton) return;
 
         stopCameraStream();
         img.classList.add("hidden");
-        video.classList.add("hidden");
-        video.srcObject = null;
         capturedBase64 = null;
         showRetakeUI(false);
 
         placeholder.classList.remove("hidden");
-        startButton.classList.add("hidden");
         placeholder.innerHTML = `
-        <div class="w-14 h-14 bg-slate-800/80 rounded-2xl flex items-center justify-center mx-auto text-sky-400 ring-1 ring-white/10">
+        <div class="w-14 h-14 bg-slate-800 rounded-full flex items-center justify-center mx-auto text-blue-400 shadow-lg">
           <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
         </div>
-        <p class="text-xs font-semibold text-slate-300">Menghubungkan Kamera...</p>`;
-
-        if (!isCameraAllowedInThisContext()) {
-          placeholder.innerHTML = `
-          <div class="text-rose-400 space-y-1 p-2">
-            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-            <p class="text-[11px] font-semibold">Kamera hanya bisa dipakai pada halaman HTTPS/localhost</p>
-            <p class="text-[9px] text-slate-400">Jalankan aplikasi melalui HTTPS atau localhost, lalu izinkan akses kamera pada browser.</p>
-          </div>`;
-          startButton.classList.remove("hidden");
-          return;
-        }
-
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          placeholder.innerHTML =
-            '<p class="text-[11px] font-semibold text-rose-300">Browser Anda tidak mendukung akses kamera.</p>';
-          startButton.classList.remove("hidden");
-          return;
-        }
+        <p class="text-xs font-semibold tracking-wide">Menghubungkan Kamera...</p>`;
 
         const constraintOptions = [
-          {
-            video: {
-              facingMode: { ideal: currentFacingMode },
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-            },
-            audio: false,
-          },
           {
             video: {
               facingMode: currentFacingMode,
@@ -1167,45 +1040,34 @@
             },
             audio: false,
           },
-          {
-            video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-            audio: false,
-          },
+          { video: { facingMode: currentFacingMode }, audio: false },
           { video: true, audio: false },
         ];
 
         let stream = null;
-        let lastError = null;
 
         for (const constraint of constraintOptions) {
           try {
             stream = await navigator.mediaDevices.getUserMedia(constraint);
             if (stream) break;
           } catch (err) {
-            lastError = err;
             console.warn("Mencoba opsi kamera berikutnya...", err);
           }
         }
 
         if (!stream) {
           placeholder.innerHTML = `
-          <div class="text-rose-400 space-y-1 p-2">
-            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-            <p class="text-[11px] font-semibold">Kamera belum dapat diakses</p>
-            <p class="text-[9px] text-slate-400">Izinkan kamera untuk situs ini, tutup aplikasi lain yang memakai kamera, lalu coba lagi.</p>
-            <p class="text-[8px] text-slate-500 mt-1">${lastError ? lastError.name + ": " + lastError.message : "Browser menolak akses kamera."}</p>
+          <div class="text-rose-400 space-y-2 p-2">
+            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+            <p class="text-xs font-bold">Izin Kamera Diblokir</p>
+            <p class="text-[10px] text-slate-400">Gunakan tombol "Kamera Perangkat" jika di HP.</p>
           </div>`;
-          startButton.classList.remove("hidden");
           return;
         }
 
         currentStream = stream;
         video.srcObject = stream;
-        video.muted = true;
-        video.playsInline = true;
-        video.setAttribute("playsinline", "true");
 
-        // Cermin khusus kamera depan
         video.style.transform =
           currentFacingMode === "user" ? "scaleX(-1)" : "scaleX(1)";
 
@@ -1213,16 +1075,8 @@
           await video.play();
           video.classList.remove("hidden");
           placeholder.classList.add("hidden");
-          startButton.classList.add("hidden");
         } catch (playErr) {
           console.error("Gagal memutar video:", playErr);
-          placeholder.innerHTML = `
-          <div class="text-rose-400 space-y-1 p-2">
-            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-            <p class="text-[11px] font-semibold">Kamera aktif, tetapi video tidak bisa diputar.</p>
-            <p class="text-[9px] text-slate-400">Coba tekan tombol "Aktifkan Kamera" lagi atau gunakan perangkat lain.</p>
-          </div>`;
-          startButton.classList.remove("hidden");
         }
       }
 
@@ -1245,15 +1099,12 @@
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext("2d");
 
-        // Mirroring canvas untuk kamera selfie depan
         if (currentFacingMode === "user") {
           ctx.translate(canvas.width, 0);
           ctx.scale(-1, 1);
         }
 
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        // Kompresi JPEG kualitas 0.8 untuk menghemat ukuran payload Apps Script
         capturedBase64 = canvas.toDataURL("image/jpeg", 0.8);
 
         img.src = capturedBase64;
@@ -1293,7 +1144,6 @@
         reader.readAsDataURL(file);
       }
 
-      // Helper kompresi gambar HP agar tidak melebihi kapasitas Apps Script
       function compressAndResizeImage(imageSrc, callback) {
         const img = new Image();
         img.onload = function () {
@@ -1394,9 +1244,9 @@
           document.getElementById("pegawaiFormView").classList.remove("hidden");
           document.getElementById("pegawaiRiwayatView").classList.add("hidden");
           document.getElementById("btnPegawaiPresensi").className =
-            "flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-center shadow transition-all";
+            "flex-1 py-3 rounded-2xl bg-blue-600 text-white text-center shadow-md shadow-blue-500/20 transition-all font-semibold";
           document.getElementById("btnPegawaiRiwayat").className =
-            "flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all";
+            "flex-1 py-3 rounded-2xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 text-center transition-all font-semibold";
           initPegawaiMap();
           startCameraAuto();
         } else {
@@ -1406,9 +1256,9 @@
             .getElementById("pegawaiRiwayatView")
             .classList.remove("hidden");
           document.getElementById("btnPegawaiPresensi").className =
-            "flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all";
+            "flex-1 py-3 rounded-2xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 text-center transition-all font-semibold";
           document.getElementById("btnPegawaiRiwayat").className =
-            "flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-center shadow transition-all";
+            "flex-1 py-3 rounded-2xl bg-blue-600 text-white text-center shadow-md shadow-blue-500/20 transition-all font-semibold";
           loadUserLogs();
         }
       }
@@ -1420,20 +1270,19 @@
             list.innerHTML = "";
             if (logs.length === 0) {
               list.innerHTML =
-                '<p class="text-slate-400 text-center py-8 md:col-span-2">Belum ada riwayat presensi.</p>';
+                '<p class="text-slate-400 text-center py-10 font-medium">Belum ada riwayat presensi.</p>';
               return;
             }
             logs.forEach((l) => {
               list.innerHTML += `
-            <div class="p-4 bg-blue-50/40 hover:bg-blue-50/80 transition-colors rounded-2xl flex justify-between items-center border border-blue-100/80">
+            <div class="p-4 bg-white rounded-2xl flex justify-between items-center border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
               <div>
-                <span class="font-extrabold text-slate-800 text-xs sm:text-sm">${l.tipe}</span>
-                <span class="text-[11px] text-slate-400 block mt-0.5">${l.timestamp}</span>
+                <span class="font-extrabold text-slate-700 block mb-0.5">${l.tipe}</span>
+                <span class="text-[11px] text-slate-400 block font-medium"><i class="fa-regular fa-clock mr-1"></i>${l.timestamp}</span>
               </div>
               <div class="text-right">
-                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full ${l.status.includes("BERHASIL") ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}">${l.status}</span>
-                <span class="text-[11px] text-slate-400 block mt-1">${l.jarak}m dari kantor</span>
-                ${l.durasi !== "" ? `<span class="text-[11px] text-blue-600 font-semibold block">${l.durasi} jam \vert{} Transport Rp${Number(l.transport).toLocaleString("id-ID")}</span>` : ""}
+                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-md ${l.status.includes("BERHASIL") ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}">${l.status}</span>
+                <span class="text-[11px] text-slate-400 block mt-1.5 font-medium">${l.jarak}m dari kantor</span>
               </div>
             </div>
           `;
@@ -1459,45 +1308,41 @@
           "btnAdminLogs",
         ].forEach((id) => {
           document.getElementById(id).className =
-            "flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 text-center transition-all";
+            "flex-1 py-3 px-2 rounded-2xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 text-center transition-all font-semibold";
         });
 
         if (tab === "stats") {
           document.getElementById("adminStatsView").classList.remove("hidden");
           document.getElementById("btnAdminStats").className =
-            "flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-center shadow transition-all";
+            "flex-1 py-3 px-2 rounded-2xl bg-blue-600 text-white text-center shadow-md shadow-blue-500/20 transition-all font-semibold";
           loadAdminStats();
         } else if (tab === "geofence") {
           document
             .getElementById("adminGeofenceView")
             .classList.remove("hidden");
           document.getElementById("btnAdminGeofence").className =
-            "flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-center shadow transition-all";
+            "flex-1 py-3 px-2 rounded-2xl bg-blue-600 text-white text-center shadow-md shadow-blue-500/20 transition-all font-semibold";
           initAdminMap();
         } else if (tab === "users") {
           document.getElementById("adminUsersView").classList.remove("hidden");
           document.getElementById("btnAdminUsers").className =
-            "flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-center shadow transition-all";
+            "flex-1 py-3 px-2 rounded-2xl bg-blue-600 text-white text-center shadow-md shadow-blue-500/20 transition-all font-semibold";
         } else if (tab === "logs") {
           document.getElementById("adminLogsView").classList.remove("hidden");
           document.getElementById("btnAdminLogs").className =
-            "flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-center shadow transition-all";
+            "flex-1 py-3 px-2 rounded-2xl bg-blue-600 text-white text-center shadow-md shadow-blue-500/20 transition-all font-semibold";
           loadAdminLogs();
         }
       }
 
       function initAdminMap() {
         if (!systemSettings) return;
-
         const officeLatLng = [systemSettings.lat, systemSettings.lng];
 
         if (!adminMap) {
           adminMap = L.map("adminMap").setView(officeLatLng, 16);
-
           L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             maxZoom: 19,
-            attribution:
-              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
           }).addTo(adminMap);
         } else {
           adminMap.setView(officeLatLng, 16);
@@ -1506,10 +1351,9 @@
         if (adminMarker) adminMap.removeLayer(adminMarker);
         if (adminCircle) adminMap.removeLayer(adminCircle);
 
-        adminMarker = L.marker(officeLatLng, {
-          draggable: true,
-        }).addTo(adminMap);
-
+        adminMarker = L.marker(officeLatLng, { draggable: true }).addTo(
+          adminMap,
+        );
         adminCircle = L.circle(officeLatLng, {
           color: "#2563eb",
           fillColor: "#3b82f6",
@@ -1519,12 +1363,9 @@
 
         adminMarker.on("dragend", function (e) {
           const coord = e.target.getLatLng();
-
           adminCircle.setLatLng(coord);
-
           document.getElementById("adminLatVal").innerText =
             coord.lat.toFixed(6);
-
           document.getElementById("adminLngVal").innerText =
             coord.lng.toFixed(6);
         });
@@ -1549,26 +1390,14 @@
         if (!adminMarker) return;
         const pos = adminMarker.getLatLng();
         const radius = parseFloat(document.getElementById("adminRadius").value);
-        const checkInStart = document.getElementById("adminCheckInStart").value;
-        const checkInEnd = document.getElementById("adminCheckInEnd").value;
-        const checkOutStart =
-          document.getElementById("adminCheckOutStart").value;
-        const checkOutEnd = document.getElementById("adminCheckOutEnd").value;
+        const waToken = document.getElementById("adminWaToken").value;
 
         google.script.run
           .withSuccessHandler((res) => {
             alert(res.message);
             fetchInitialData();
           })
-          .updateSettings(
-            pos.lat,
-            pos.lng,
-            radius,
-            checkInStart,
-            checkInEnd,
-            checkOutStart,
-            checkOutEnd,
-          );
+          .updateSettings(pos.lat, pos.lng, radius, waToken);
       }
 
       function handleAddUser() {
@@ -1603,26 +1432,25 @@
             tbody.innerHTML = "";
             if (logs.length === 0) {
               tbody.innerHTML =
-                '<tr><td colspan="4" class="p-8 text-center text-slate-400">Tidak ada data.</td></tr>';
+                '<tr><td colspan="4" class="p-8 text-center text-slate-400 font-medium">Tidak ada data.</td></tr>';
               return;
             }
             logs.forEach((l) => {
               tbody.innerHTML += `
-            <tr class="hover:bg-blue-50/40 transition-colors">
-              <td class="p-3.5 sm:p-4">
-                <div class="font-bold text-slate-800">${l.nama}</div>
-                <div class="text-[10px] text-blue-600 font-semibold">NIP: ${l.nip}</div>
+            <tr class="hover:bg-slate-50/50 transition-colors">
+              <td class="p-4">
+                <div class="font-bold text-slate-700">${l.nama}</div>
+                <div class="text-[11px] text-slate-400 font-medium">NIP: ${l.nip}</div>
               </td>
-              <td class="p-3.5 sm:p-4">
-                <div class="font-semibold text-slate-700">${l.tipe}</div>
-                <div class="text-[10px] text-slate-400">${l.timestamp}</div>
+              <td class="p-4">
+                <div class="font-bold text-slate-600">${l.tipe}</div>
+                <div class="text-[11px] text-slate-400 font-medium">${l.timestamp}</div>
               </td>
-              <td class="p-3.5 sm:p-4">
-                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${l.status.includes("BERHASIL") ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}">${l.status}</span>
-                ${l.durasi !== "" ? `<div class="text-[10px] text-slate-500 mt-1 font-medium">${l.durasi} jam \vert{} Rp${Number(l.transport).toLocaleString("id-ID")}</div>` : ""}
+              <td class="p-4">
+                <span class="px-2.5 py-1 rounded-md text-[10px] font-extrabold ${l.status.includes("BERHASIL") ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}">${l.status}</span>
               </td>
-              <td class="p-3.5 sm:p-4 text-center">
-                <a href="${l.foto}" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors"><i class="fa-solid fa-image text-sm"></i></a>
+              <td class="p-4 text-center">
+                <a href="${l.foto}" target="_blank" class="inline-flex w-8 h-8 rounded-full bg-blue-50 text-blue-600 items-center justify-center hover:bg-blue-100 transition-colors shadow-sm"><i class="fa-solid fa-image text-sm"></i></a>
               </td>
             </tr>
           `;
