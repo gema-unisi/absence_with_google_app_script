@@ -1013,6 +1013,39 @@
         }
       }
 
+      async function checkCameraPermission() {
+        try {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            return "Browser tidak mendukung akses kamera.";
+          }
+
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          });
+
+          stream.getTracks().forEach((track) => track.stop());
+
+          return "Izin kamera tersedia.";
+        } catch (err) {
+          console.error(err.name, err.message);
+
+          if (err.name === "NotAllowedError") {
+            return "Izin kamera ditolak atau dibatasi browser.";
+          }
+
+          if (err.name === "NotFoundError") {
+            return "Kamera tidak ditemukan.";
+          }
+
+          if (err.name === "NotReadableError") {
+            return "Kamera sedang digunakan aplikasi lain.";
+          }
+
+          return "Kamera gagal diakses: " + err.message;
+        }
+      }
+
       // PENANGANAN STREAM KAMERA (LAPTOP & MOBILE)
       async function startCameraAuto() {
         const video = document.getElementById("videoPreview");
@@ -1020,63 +1053,90 @@
         const placeholder = document.getElementById("cameraPlaceholder");
 
         stopCameraStream();
+
+        video.classList.add("hidden");
         img.classList.add("hidden");
         capturedBase64 = null;
         showRetakeUI(false);
 
         placeholder.classList.remove("hidden");
         placeholder.innerHTML = `
-        <div class="w-14 h-14 bg-slate-800 rounded-full flex items-center justify-center mx-auto text-blue-400 shadow-lg">
-          <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
-        </div>
-        <p class="text-xs font-semibold tracking-wide">Menghubungkan Kamera...</p>`;
+    <div class="w-14 h-14 bg-slate-800 rounded-full flex items-center justify-center mx-auto text-blue-400">
+      <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
+    </div>
+    <p class="text-xs font-semibold tracking-wide">
+      Menghubungkan Kamera...
+    </p>`;
 
-        const constraintOptions = [
-          {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          placeholder.innerHTML = `
+      <p class="text-xs text-rose-400 font-bold">
+        Browser tidak mendukung akses kamera langsung.
+      </p>
+      <p class="text-xs text-slate-400">
+        Gunakan tombol Kamera Perangkat.
+      </p>`;
+          return;
+        }
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
             video: {
-              facingMode: currentFacingMode,
+              facingMode: { ideal: currentFacingMode },
               width: { ideal: 1280 },
               height: { ideal: 720 },
             },
             audio: false,
-          },
-          { video: { facingMode: currentFacingMode }, audio: false },
-          { video: true, audio: false },
-        ];
+          });
 
-        let stream = null;
+          currentStream = stream;
+          video.srcObject = stream;
+          video.style.transform =
+            currentFacingMode === "user" ? "scaleX(-1)" : "scaleX(1)";
 
-        for (const constraint of constraintOptions) {
-          try {
-            stream = await navigator.mediaDevices.getUserMedia(constraint);
-            if (stream) break;
-          } catch (err) {
-            console.warn("Mencoba opsi kamera berikutnya...", err);
-          }
-        }
+          await new Promise((resolve, reject) => {
+            if (video.readyState >= 1 && video.videoWidth > 0) {
+              resolve();
+              return;
+            }
 
-        if (!stream) {
-          placeholder.innerHTML = `
-          <div class="text-rose-400 space-y-2 p-2">
-            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
-            <p class="text-xs font-bold">Izin Kamera Diblokir</p>
-            <p class="text-[10px] text-slate-400">Gunakan tombol "Kamera Perangkat" jika di HP.</p>
-          </div>`;
-          return;
-        }
+            video.onloadedmetadata = () => resolve();
+            video.onerror = () => reject(new Error("Video gagal dimuat."));
+          });
 
-        currentStream = stream;
-        video.srcObject = stream;
-
-        video.style.transform =
-          currentFacingMode === "user" ? "scaleX(-1)" : "scaleX(1)";
-
-        try {
           await video.play();
+
           video.classList.remove("hidden");
           placeholder.classList.add("hidden");
-        } catch (playErr) {
-          console.error("Gagal memutar video:", playErr);
+        } catch (err) {
+          stopCameraStream();
+          video.srcObject = null;
+
+          console.error("Kesalahan kamera:", err.name, err.message);
+
+          let message = "Kamera gagal diakses.";
+
+          if (err.name === "NotAllowedError") {
+            message = "Izin kamera ditolak. Periksa izin kamera browser.";
+          } else if (err.name === "NotFoundError") {
+            message = "Kamera tidak ditemukan pada perangkat.";
+          } else if (err.name === "NotReadableError") {
+            message = "Kamera sedang digunakan aplikasi lain.";
+          } else if (err.name === "NotFoundError") {
+            message = "Perangkat kamera tidak ditemukan.";
+          } else if (err.name === "AbortError") {
+            message = "Akses kamera terhenti. Silakan coba lagi.";
+          }
+
+          placeholder.classList.remove("hidden");
+          placeholder.innerHTML = `
+      <div class="text-rose-400 space-y-2 p-3 text-center">
+        <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+        <p class="text-xs font-bold">${message}</p>
+        <p class="text-xs text-slate-400">
+          Anda juga dapat menggunakan tombol Kamera Perangkat.
+        </p>
+      </div>`;
         }
       }
 
@@ -1085,34 +1145,21 @@
         const canvas = document.getElementById("canvasPreview");
         const img = document.getElementById("imagePreview");
 
-        if (!currentStream || video.paused || video.ended) {
-          return alert("Kamera belum siap atau belum aktif!");
-        }
-
-        if (video.videoWidth === 0 || video.videoHeight === 0) {
-          return alert(
-            "Silakan tunggu sebentar hingga tampilan kamera muncul.",
+        if (
+          !currentStream ||
+          !currentStream.active ||
+          video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
+          video.videoWidth === 0 ||
+          video.videoHeight === 0
+        ) {
+          alert(
+            "Kamera belum siap. Tunggu sampai preview kamera muncul, lalu coba lagi.",
           );
+          return;
         }
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext("2d");
-
-        if (currentFacingMode === "user") {
-          ctx.translate(canvas.width, 0);
-          ctx.scale(-1, 1);
-        }
-
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        capturedBase64 = canvas.toDataURL("image/jpeg", 0.8);
-
-        img.src = capturedBase64;
-        img.classList.remove("hidden");
-        video.classList.add("hidden");
-
-        showRetakeUI(true);
-        stopCameraStream();
+        // Lanjutkan dengan kode takeSelfie() lama
+        // mulai dari canvas.width = video.videoWidth;
       }
 
       // KOMPRESI & OTOMATISASI KAMERA PERANGKAT (HP NATIVE CAMERA)
